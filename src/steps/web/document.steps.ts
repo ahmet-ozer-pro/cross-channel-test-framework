@@ -22,3 +22,4 @@ Then('API\'de oluşturulan evrak web listesinde görünür', async function (thi
   const page = new DocumentListPage(this.page);
   await expect(page.rowByDocumentNumber(documentNumber)).toBeVisible();
 });
+
