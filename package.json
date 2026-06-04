@@ -1,0 +1,27 @@
+{
+  "name": "cross-channel-test-framework",
+  "version": "0.1.0",
+  "description": "Cross-channel (API + Web + Mobile + DB + Contract) BDD test automation framework",
+  "type": "commonjs",
+  "scripts": {
+    "test": "cucumber-js",
+    "test:smoke": "cucumber-js --tags @smoke",
+    "test:regression": "cucumber-js --tags @regression",
+    "test:cross-channel": "cucumber-js --tags @cross-channel",
+    "test:parallel": "cucumber-js --parallel 4",
+    "test:dry": "cucumber-js --dry-run",
+    "arch:check": "depcruise src --config .dependency-cruiser.js",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^11.2.0",
+    "@playwright/test": "^1.49.1",
+    "@types/node": "^22.10.0",
+    "dependency-cruiser": "^16.8.0",
+    "dotenv": "^17.4.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}
