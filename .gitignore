@@ -13,3 +13,8 @@ test-results/
 
 # OS
 .DS_Store
+
+# Claude Code — kişisel ayarlar (ekip ayarı settings.json commit edilir)
+.claude/settings.local.json
+
+
