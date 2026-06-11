@@ -6,6 +6,23 @@ Stack: TypeScript · Cucumber JS · Playwright · (Appium / Pact — sonraki faz
 Bu repo iskelet aşamasında: kanal implementasyonları stub, mimari guardrail'lar yerinde.
 Hedef: hızlı büyürken mimari olgunluğu korumak.
 
+## Mimari Karar (BAĞLAYICI — ADR-0001)
+
+> **Bu repoda kod yazan her AI aracı (Claude Code, Copilot, Cursor, GPT-tabanlı agent)
+> ve insan, [docs/adr/0001-test-otomasyon-mimarisi.md](docs/adr/0001-test-otomasyon-mimarisi.md)'e
+> UYMAK ZORUNDADIR. Bu karardan sapmak için YENİ BİR ADR gerekir; tek tek
+> PR/commit içinde sessizce sapma YASAKTIR.**
+
+Özet (tam metin ADR-0001'de):
+- **Runner = Playwright Test.** Yeni testler burada koşar (`*.spec.ts` ya da
+  `playwright-bdd` ile `*.feature`). `cucumber-js`'e yeni bağımlılık/senaryo EKLENMEZ.
+- **Ports & Adapters:** Test/step somut client'a (`DocumentApi`…) değil **port arayüzüne**
+  bağlanır; adapter **fixture** ile enjekte edilir. Tool-bağlı kod yalnızca `src/adapters/**`.
+- **Screenplay YASAK.** Chaining `src/tasks/**` altındaki kompoze edilebilir görevlerle.
+- **Organizasyon DOMAIN bazlı** (`tests/<domain>/`), kanal bazlı değil.
+- **Test dağılımı:** 10k'nın hepsi yavaş e2e olamaz — çok contract/API, az e2e (test trophy).
+- Migrasyon **evrimsel**: yeni kod yeni mimaride, mevcut cucumber senaryoları köprüde yaşar.
+
 ## Komutlar
 
 - `npm run typecheck` — TypeScript tip kontrolü (env'e dokunmaz, her zaman çalışır)
@@ -28,6 +45,12 @@ Hedef: hızlı büyürken mimari olgunluğu korumak.
    objesi üzerinden git (`DocumentListPage`, `DocumentApi` gibi).
 5. Her senaryo verisini API ile üretir ve `this.cleanup.register(...)` ile temizliğini
    ÜRETİMLE AYNI step'te kaydeder. Test verisi birikmez.
+
+> Kapsam notu: Yukarıdaki kurallar mevcut `cucumber-js` çekirdeği içindir ve geçerlidir.
+> Kural 3 (arrow function yasağı) yalnızca cucumber step tanımlarına özeldir — hedef
+> mimaride (Playwright Test fixtures / `*.spec.ts`) arrow function NORMALDİR. Kural 4'teki
+> "page/screen/client objesi" hedef mimaride **port + adapter (fixture enjeksiyonu)** olarak
+> evrilir. Yeni kod ADR-0001 yönünde yazılır; çakışmada ADR-0001 önceliklidir.
 
 ## İsimlendirme
 

@@ -18,6 +18,8 @@
     "test:dry": "cucumber-js --dry-run",
     "pretest:dry": "npm run features:prepare",
     "test:unit": "node --require ts-node/register/transpile-only --test test/unit/*.test.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:list": "playwright test --list",
     "arch:check": "depcruise src --config .dependency-cruiser.js",
     "allure:generate": "allure generate ./allure-results -o ./allure-report --clean",
     "allure:open": "allure open ./allure-report",

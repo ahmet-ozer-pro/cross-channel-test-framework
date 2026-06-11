@@ -6,6 +6,11 @@ birleştiren cross-channel test otomasyon projesi.
 Stack: **TypeScript · Cucumber JS · Playwright · (Appium / Pact — sonraki fazlar)**
 Raporlama: **Allure 2** · AI: **Claude Code + Playwright MCP**
 
+## Mimari Karar (BAĞLAYICI)
+
+Hedef mimari ve değişmez kurallar: **[docs/adr/0001-test-otomasyon-mimarisi.md](docs/adr/0001-test-otomasyon-mimarisi.md)**.
+AI araçları için: [CLAUDE.md](CLAUDE.md) · [AGENTS.md](AGENTS.md). Bu karardan sapmak yeni bir ADR gerektirir.
+
 ## Mimari Kurallar (bozulmaması gerekenler)
 
 1. **Tek state kaynağı: `TestWorld`.** Tüm senaryo state'i World'de.

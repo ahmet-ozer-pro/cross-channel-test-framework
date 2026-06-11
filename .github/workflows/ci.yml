@@ -59,3 +59,8 @@ jobs:
 
       - name: Unit testler (framework self-test)
         run: npm run test:unit
+
+      # Playwright Test (ADR-0001 yeni runner) — keşif/derleme. Gerçek e2e backend ister,
+      # CI'da RUN edilmez; --list ile testlerin derlendiği + bulunduğu doğrulanır (browser indirmez).
+      - name: E2E keşif (Playwright Test --list)
+        run: npm run test:e2e:list
