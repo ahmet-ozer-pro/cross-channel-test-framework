@@ -76,7 +76,9 @@ Before({ tags: '@db' }, async function (this: TestWorld) {
   if (!env.DB_SQL_URL && !env.DB_NOSQL_URL) {
     return;
   }
-  // Faz 2: const client = await connect(...); this.setDb(client);
+  // TODO(Faz 2): channels/db/db-client.ts'teki DbClient ile BİRLEŞTİR.
+  // Şu an iki koordinesiz iskelet var: DbClient (querySql stub) + World._db (unknown seam).
+  // Faz 2: const client = new DbClient(...); await client.connect?.(); this.setDb(client);
 });
 
 /**

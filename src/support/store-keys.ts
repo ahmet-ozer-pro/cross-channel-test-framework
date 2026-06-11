@@ -13,6 +13,8 @@
  *   Okuma serbest, yazma sahibi kanala aittir. Bu konvansiyon karışıklığı önler.
  */
 
+import type { CreatedDocument } from '../channels/api/document-api';
+
 export interface StoreKey<T> {
   readonly id: string;
   /** Phantom type marker — T'yi compile-time'da taşır, runtime'da asla set edilmez. */
@@ -44,6 +46,10 @@ export const Keys = {
   DOCUMENT_NUMBER: defineKey<string>('DOCUMENT_NUMBER'),
   EVENT_ID: defineKey<string>('EVENT_ID'),
   USER_TOKEN: defineKey<string>('USER_TOKEN'),
+
+  // --- API kanalı yazar (KOLEKSIYON) ---
+  // N evrak üretip hepsini biriktirmek için. API push'lar, Web/Mobile getAll ile okur.
+  CREATED_DOCUMENTS: defineCollectionKey<CreatedDocument>('CREATED_DOCUMENTS'),
 
   // --- Web kanalı yazar ---
   // (örnek) WEB_SELECTED_ROW_INDEX: defineKey<number>('WEB_SELECTED_ROW_INDEX'),

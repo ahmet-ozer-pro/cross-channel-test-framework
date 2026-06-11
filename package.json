@@ -17,12 +17,11 @@
     "pretest:parallel": "npm run features:prepare",
     "test:dry": "cucumber-js --dry-run",
     "pretest:dry": "npm run features:prepare",
+    "test:unit": "node --require ts-node/register/transpile-only --test test/unit/*.test.ts",
     "arch:check": "depcruise src --config .dependency-cruiser.js",
     "allure:generate": "allure generate ./allure-results -o ./allure-report --clean",
     "allure:open": "allure open ./allure-report",
     "allure:serve": "allure serve ./allure-results",
-    "lint": "eslint . --ext .ts",
-    "format": "prettier --write \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

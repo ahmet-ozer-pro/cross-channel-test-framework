@@ -85,6 +85,8 @@ export class TestWorld extends World {
   }
 
   // --- DB kanalı (Faz 2 — SQL/NoSQL) ---
+  // TODO(Faz 2): unknown → DbClient daralt. Şu an db-client.ts'teki DbClient ile
+  // bu seam koordinesiz; Faz 2'de tip DbClient olmalı ve hooks.ts @db hook'u onu set etmeli.
   get db(): unknown {
     if (!this._db) {
       throw new Error(

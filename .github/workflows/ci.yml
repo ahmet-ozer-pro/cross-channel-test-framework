@@ -1,0 +1,61 @@
+name: CI
+
+# Mimari guardrail'ları .claude hook'undan çıkarıp HER push/PR'a bağlar.
+# Bu job SADECE env-bağımsız gate'leri + framework unit testlerini koşar.
+#
+# NEDEN gerçek suite (npm test) burada KOŞMAZ:
+#   `npm test` gerçek backend (Türksat ortamı) + headless browser + gerçek
+#   secret ister. CI'da bunlar yok; bu yüzden sadece statik/yapısal kontroller
+#   ve davranış (unit) testleri koşulur. Gerçek e2e koşusu ayrı/manuel.
+#
+# NEDEN `npx playwright install` YOK:
+#   test:dry browser açmaz, unit testler de gerçek browser gerektirmez.
+#   Browser indirmesi eklenmedi — job hızlı kalsın.
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+    branches: [main, development]
+
+jobs:
+  gates:
+    name: typecheck · arch · dry-run · unit
+    runs-on: ubuntu-latest
+
+    # CI PLACEHOLDER ENV — gerçek koşu DEĞİL, gerçek secret DEĞİL.
+    # env.ts içindeki required('BASE_URL'/'ADMIN_USER'/'ADMIN_PASS') fail-fast'i
+    # modül import edilir edilmez tetikleniyor; test:dry de env.ts'i çekiyor.
+    # Bu dummy değerler yalnızca o fail-fast'i geçmek için (hiçbir yere istek atılmaz).
+    env:
+      BASE_URL: https://ci.invalid
+      ADMIN_USER: ci
+      ADMIN_PASS: ci
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install (npm ci)
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Arch check (kanal izolasyonu)
+        run: npm run arch:check
+
+      - name: Feature hazırla (.feature.txt -> .feature)
+        run: npm run features:prepare
+
+      - name: Dry-run (step binding — 0 undefined olmalı)
+        run: npm run test:dry
+
+      - name: Unit testler (framework self-test)
+        run: npm run test:unit
