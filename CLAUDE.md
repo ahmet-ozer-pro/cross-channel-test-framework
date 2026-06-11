@@ -1,9 +1,9 @@
 # Cross-Channel Test Framework
 
-Cross-channel (API + Web + Mobile + DB + Contract) BDD test otomasyonu.
-Stack: TypeScript · Cucumber JS · Playwright · (Appium / Pact — sonraki fazlar).
+Cross-channel (API + Web + Mobile + DB + Contract) test otomasyonu.
+Stack: TypeScript · **Playwright Test** · (Appium / Pact — sonraki fazlar).
 
-Bu repo iskelet aşamasında: kanal implementasyonları stub, mimari guardrail'lar yerinde.
+Bu repo iskelet aşamasında: domain implementasyonları henüz yok, mimari guardrail'lar yerinde.
 Hedef: hızlı büyürken mimari olgunluğu korumak.
 
 ## Mimari Karar (BAĞLAYICI — ADR-0001)
@@ -14,74 +14,62 @@ Hedef: hızlı büyürken mimari olgunluğu korumak.
 > PR/commit içinde sessizce sapma YASAKTIR.**
 
 Özet (tam metin ADR-0001'de):
-- **Runner = Playwright Test.** Yeni testler burada koşar (`*.spec.ts` ya da
-  `playwright-bdd` ile `*.feature`). `cucumber-js`'e yeni bağımlılık/senaryo EKLENMEZ.
-- **Ports & Adapters:** Test/step somut client'a (`IssueApi`…) değil **port arayüzüne**
+- **Runner = Playwright Test (TEK runner).** Testler `*.spec.ts` (`tests/<domain>/`).
+- **Ports & Adapters:** Test/task somut client'a (`IssueApi`…) değil **port arayüzüne**
   bağlanır; adapter **fixture** ile enjekte edilir. Tool-bağlı kod yalnızca `src/adapters/**`.
 - **Screenplay YASAK.** Chaining `src/tasks/**` altındaki kompoze edilebilir görevlerle.
 - **Organizasyon DOMAIN bazlı** (`tests/<domain>/`), kanal bazlı değil.
 - **Test dağılımı:** 10k'nın hepsi yavaş e2e olamaz — çok contract/API, az e2e (test trophy).
-- Migrasyon **evrimsel**: yeni kod yeni mimaride, mevcut cucumber senaryoları köprüde yaşar.
 
 ## Komutlar
 
 - `npm run typecheck` — TypeScript tip kontrolü (env'e dokunmaz, her zaman çalışır)
-- `npm run arch:check` — kanal izolasyonu enforcement (dependency-cruiser)
-- `npm run test:dry` — step eşleşmesi (browser açmadan; .env gerekir)
-- `npm test` — tüm suite
-- `npm run test:cross-channel` — sadece @cross-channel senaryolar
-- `npm run test:parallel` — paralel koşu
+- `npm run arch:check` — ports/adapters katmanlama enforcement (dependency-cruiser)
+- `npm run test:unit` — framework self-test (store/cleanup/locator; env'siz)
+- `npm run test:list` — Playwright testlerini derleyip listeler (browser/backend gerekmez)
+- `npm test` — tüm Playwright suite (gerçek backend + browser ister)
 
 ## Mimari Kurallar (BOZULAMAZ)
 
-1. Kanallar yalnızca `TestWorld` içindeki `store` üzerinden konuşur.
-   API step'i `this.page`/mobile/db objesine ASLA dokunmaz. Veri akışı: API yazar,
-   Web/Mobile okur. (Bu kural `arch:check` ile import seviyesinde zorlanır.)
-2. Store anahtarları `defineKey<T>` ile tipli (`store-keys.ts`). Raw `Map<string, any>` YASAK.
-   Yeni anahtar eklerken tipini ver ve yazan kanalı yorumla belirt.
-3. Step tanımlarında arrow function KULLANMA. `async function (this: TestWorld) {...}`
-   kullan — aksi halde `this`/World bağlanmaz, `this.store` patlar.
-4. Step içine ham Playwright/Appium çağrısı yazma. Her zaman page/screen/client
-   objesi üzerinden git (`IssueBoardPage`, `IssueApi` gibi).
-5. Her senaryo verisini API ile üretir ve `this.cleanup.register(...)` ile temizliğini
-   ÜRETİMLE AYNI step'te kaydeder. Test verisi birikmez.
-
-> Kapsam notu: Yukarıdaki kurallar mevcut `cucumber-js` çekirdeği içindir ve geçerlidir.
-> Kural 3 (arrow function yasağı) yalnızca cucumber step tanımlarına özeldir — hedef
-> mimaride (Playwright Test fixtures / `*.spec.ts`) arrow function NORMALDİR. Kural 4'teki
-> "page/screen/client objesi" hedef mimaride **port + adapter (fixture enjeksiyonu)** olarak
-> evrilir. Yeni kod ADR-0001 yönünde yazılır; çakışmada ADR-0001 önceliklidir.
+1. Kanallar yalnızca tipli `store` (fixture) üzerinden konuşur. Bir kanalın adapter'ı
+   başka kanalın adapter'ını import ETMEZ. (Bu kural `arch:check` ile zorlanır.)
+2. Store anahtarları `defineKey<T>` / `defineCollectionKey<T>` ile tipli (`store-keys.ts`).
+   Raw `Map<string, any>` YASAK. Yeni anahtarın tipini ver, yazan kanalı yorumla belirt.
+3. Test/task somut adapter'a değil **port arayüzüne** bağlanır; adapter **fixture** ile
+   enjekte edilir. Tool-bağlı kod (Playwright/Appium/pg/Pact) YALNIZCA `src/adapters/**`.
+4. Test içine ham Playwright page çağrısı yazma; web etkileşimi **Page Object (POM)**
+   üzerinden git (`expect` ile assertion serbesttir).
+5. Üretilen veriyi `cleanup.register(...)` ile ÜRETİMLE AYNI yerde kaydet (fixture
+   teardown'da LIFO koşar). Karmaşık akışlar `src/tasks/**` görevleriyle kompoze edilir.
 
 ## İsimlendirme
 
-- Web Page Object → `*.page.ts` (`channels/web/`)
-- Mobile Screen Object → `*.screen.ts` (`channels/mobile/`)
-- API client → `*-api.ts` (`channels/api/`)
-- Cucumber step → `*.steps.ts` (`steps/<kanal>/`)
+- Web Page Object → `*.page.ts` (`adapters/web/`)
+- Mobile Screen Object → `*.screen.ts` (`adapters/mobile/`)
+- Port (arayüz) → `*-port.ts` (`core/ports/`) · Adapter → `*.api-adapter.ts` (`adapters/<kanal>/`)
+- Task → `*-tasks.ts` (`tasks/`) · Factory → `*-factory.ts` (`factories/`)
+- Spec → `*.spec.ts` (`tests/<domain>/`)
 
 ## Kod Standardı
 
 - Secrets asla kodda hardcoded değil — sadece `env`'den (`support/config/env.ts`).
 - Locator stratejisi: `getByRole` / `getByLabel` / `getByTestId` önce. CSS/XPath son çare.
 - Locator'ı tahmin etme — Playwright MCP varsa canlı sayfadan keşfet.
-- Paralel koşuda veri çakışmasını önlemek için üretilen veriyi benzersiz yap.
+- Paralel koşuda veri çakışmasını önlemek için üretilen veriyi benzersiz yap (randomUUID).
 
 ## Faz Durumu
 
-- Faz 1: Web + API + World/hook iskeleti — AKTİF (stub'lar bağlanıyor)
-- Faz 2: DB (SQL + NoSQL) — bekliyor
-- Faz 3: Cross-channel senaryolar — örnek hazır
-- Faz 4: Mobile (Appium) — bekliyor
-- Faz 5: Contract (Pact) — bekliyor
+- Runner: cucumber-js EMEKLİ; tek runner Playwright Test (ADR-0001).
+- Çekirdek: ports/adapters + fixtures + dependency-cruiser + CI — kuruldu.
+- Sıradaki: ilk domain dikey dilimi (Issue: port+adapter+fixture+task+POM+spec).
+- Faz 2/4/5: DB · Mobile (Appium) · Contract (Pact) — bekliyor.
 
 ## Tamamlandı Demeden Önce
 
-`typecheck` + `arch:check` + `test:dry` üçü de temiz geçmeli. Bir stub'ı gerçek
-implementasyona bağlarken ilgili senaryoyu da yeşile çevir.
+`typecheck` + `arch:check` + `test:unit` + `test:list` dördü de temiz geçmeli.
+Bir stub'ı gerçek implementasyona bağlarken ilgili spec'i de yeşile çevir.
 
 ## Çalışma Tarzı
 
-- Değişiklik yaparken etki analizi yap: bu step/anahtar değişikliği başka senaryoyu
-  bozuyor mu? (impact-analysis disiplini.)
+- Değişiklik yaparken etki analizi yap: bu değişiklik başka spec'i/task'ı bozuyor mu?
 - Dosya düzenlemek için `sed` yerine `python3` inline script tercih et.
-- Feature dosyaları teslim/paylaşımda `.txt`; projede `.feature` olarak çalışır.

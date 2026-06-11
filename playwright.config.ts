@@ -6,7 +6,7 @@ import 'dotenv/config';
  *
  * Ölçek (10k) için: fullyParallel + CI'da retry + sharding'e hazır (CI'da --shard=i/N).
  * trace 'on-first-retry' → flake teşhisi. Gerçek e2e koşusu backend ister; CI'da
- * sadece keşif (--list) çalışır (bkz. .github/workflows). cucumber-js köprüde ayrı koşar.
+ * sadece keşif (--list) çalışır (bkz. .github/workflows).
  */
 export default defineConfig({
   testDir: 'tests',

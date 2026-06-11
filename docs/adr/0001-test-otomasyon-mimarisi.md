@@ -16,19 +16,19 @@ Hedef: kolay uygulanabilir · karmaşık & chaining senaryoları kaldırabilen �
 5 kanal (Web + Mobil + API + DB + Contract) koşabilen · **10.000+ senaryoya**
 ölçeklenen · **7-10 yıl sürdürülebilir** bir test otomasyon mimarisi.
 
-Mevcut çekirdek (TestWorld + tipli store + kanal izolasyonu + cleanup +
-dependency-cruiser + CI) doğru ama iki eksik var: (1) ölçek-execution makinesi
-(sharding/trace/retry), (2) tool-bağımsızlık (somut Playwright/client'lara bağlılık).
+Mevcut çekirdek (tipli store + kanal izolasyonu + cleanup + dependency-cruiser + CI)
+doğru ama iki eksik var: (1) ölçek-execution makinesi (sharding/trace/retry),
+(2) tool-bağımsızlık (somut Playwright/client'lara bağlılık).
 
 ## Karar
 
 **Fixture-tabanlı dependency injection + Ports-and-Adapters + Page/Screen Object
 + task kompozisyonu + data factory, domain'e göre organize.** Screenplay DEĞİL.
 
-Pivot: **runner = Playwright Test.** Gherkin korunur ve `playwright-bdd` ile
-Playwright Test üzerinde derlenir (iş-okunur senaryo + modern fixture/sharding/trace
-bir arada). İleride saf `*.spec.ts` testler aynı runner'da yan yana yaşayabilir —
-yani Gherkin'i bırakma kararı GERİ-DÖNÜŞLÜ kalır, bugün verilmek zorunda değildir.
+Pivot: **runner = Playwright Test (TEK runner).** Testler saf `*.spec.ts`.
+cucumber-js EMEKLİYE AYRILDI (köprü kaldırıldı — fixtures/sharding/trace tek runner'da).
+İş-okunur Gherkin gerekirse `playwright-bdd` ile aynı runner üzerinde İLERİDE eklenebilir
+(opsiyonel); bu karar geri-dönüşlü kalır, bugün gerekmez.
 
 ### Neden bu, neden Screenplay değil
 - Fixtures, TS/JS dünyasının güncel DI mekanizması; Screenplay'in kompozisyon
@@ -40,9 +40,9 @@ yani Gherkin'i bırakma kararı GERİ-DÖNÜŞLÜ kalır, bugün verilmek zorund
 
 ## Bağlayıcı kurallar (atlanamaz / bozulamaz)
 
-1. **Runner:** Yeni testler **Playwright Test** üzerinde koşar (saf `*.spec.ts` ya da
-   `playwright-bdd` ile `*.feature`). `cucumber-js`'e YENİ bağımlılık/senaryo eklenmez;
-   mevcut cucumber senaryoları geçiş köprüsünde yaşar, çoğaltılmaz.
+1. **Runner:** TEK runner **Playwright Test**; testler `*.spec.ts` (`tests/<domain>/`).
+   `cucumber-js` emekli — geri eklenmez. (Gherkin gerekirse `playwright-bdd` aynı
+   runner üzerinde opsiyonel; ayrı runner getirme.)
 2. **Ports & Adapters:** Test/step kodu somut kanal client'ına (`IssueApi`,
    `IssueBoardPage`…) DOĞRUDAN bağlanmaz. **Port arayüzüne** bağlanır; somut adapter
    **fixture ile enjekte** edilir. Tool-bağlı kod (Playwright/Appium/pg/Pact) YALNIZCA
@@ -55,9 +55,8 @@ yani Gherkin'i bırakma kararı GERİ-DÖNÜŞLÜ kalır, bugün verilmek zorund
 5. **Chaining:** Karmaşık/zincirli akışlar `tasks/` altındaki kompoze edilebilir
    görevlerle kurulur (örn. `createIssue` → `assignIssue`); senaryo içinde ham
    adapter juggling ile değil. State tipli context + koleksiyon API ile taşınır.
-6. **Organizasyon:** Testler **DOMAIN**'e göre (`tests/<domain>/` veya
-   `features/<domain>/`), kanala göre DEĞİL. Disiplinli tag taksonomisi
-   (`@smoke @e2e @contract @<domain> @quarantine`).
+6. **Organizasyon:** Testler **DOMAIN**'e göre (`tests/<domain>/`), kanala göre DEĞİL.
+   Disiplinli tag taksonomisi (`@smoke @e2e @contract @<domain> @quarantine`).
 7. **Test verisi:** factory/builder + benzersiz üretim (randomUUID/worker-id) +
    üretimle AYNI yerde cleanup kaydı. Veri birikmez, paralelde çakışmaz.
 8. **Ölçek:** Paralellik + CI sharding (`--shard=i/N`); flake için retry + `@quarantine`
@@ -68,10 +67,6 @@ yani Gherkin'i bırakma kararı GERİ-DÖNÜŞLÜ kalır, bugün verilmek zorund
     Test trophy: çok sayıda hızlı contract/API/component + az sayıda kritik e2e.
     Mimari her seviyeyi ucuza yazılabilir kılmalı.
 
-> Not (runner-özel kural): `cucumber-js` step tanımlarındaki "arrow function yasak"
-> kuralı yalnızca kalan cucumber glue için geçerlidir. Playwright Test fixtures /
-> `*.spec.ts` altında arrow function + fixture enjeksiyonu NORMALDİR.
-
 ## Hedef proje yapısı
 
 ```
@@ -79,21 +74,21 @@ src/
   core/
     fixtures/      # Playwright fixtures = DI (page, apiClient, db, mobile, contract, store)
     ports/         # ARAYÜZLER (tool-bağımsız): IssuePort, AuthPort, ...
-    context/       # tipli cross-channel state (chaining) — bugünkü store evrilir
   adapters/        # port implementasyonları (TOOL-BAĞLI, tek değişim noktası)
     web/ api/ db/ mobile/ contract/
   tasks/           # kompoze edilebilir iş görevleri (chaining)
   factories/       # test verisi builder'ları
-tests/  (veya features/)
-  <domain>/        # issue/ proje/ board/ ...  → DOMAIN bazlı
+tests/
+  <domain>/        # issue/ proje/ board/ ...  → DOMAIN bazlı (*.spec.ts)
 playwright.config.ts   # projects (kanal/ortam), sharding, retry, trace, reporter
 ```
 
-Bugünden **kalan** (taşınır): tipli store fikri, cleanup disiplini, resilient-locator,
-dependency-cruiser, CI gate'leri, isimlendirme, env fail-fast.
-**Evrilen:** runner (cucumber-js → Playwright Test), kanal → port+adapter,
-hooks/world → fixtures, manuel chaining → tasks, kanal-klasör → domain-klasör,
-+contract, +sharding, +flake politikası.
+**Korunan:** tipli store, cleanup disiplini, resilient-locator, dependency-cruiser,
+CI gate'leri, env fail-fast.
+**Tamamlanan geçiş:** runner cucumber-js → Playwright Test (cucumber EMEKLİ),
+kanal client → port+adapter, hooks/world → fixtures, auth → fixture.
+**Sıradaki:** ilk domain dilimi (Issue), sonra tasks/factory, DB/Mobile/Contract,
+sharding + flake politikası.
 
 ## Sonuçlar
 

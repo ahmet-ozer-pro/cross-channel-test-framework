@@ -1,10 +1,10 @@
 # Cross-Channel Test Automation Framework
 
-API + Web + Mobile + DB + Contract kanallarını tek bir BDD framework'ünde
+API + Web + Mobile + DB + Contract kanallarını tek bir framework'te
 birleştiren cross-channel test otomasyon projesi.
 
-Stack: **TypeScript · Cucumber JS · Playwright · (Appium / Pact — sonraki fazlar)**
-Raporlama: **Allure 2** · AI: **Claude Code + Playwright MCP**
+Stack: **TypeScript · Playwright Test · (Appium / Pact — sonraki fazlar)**
+AI: **Claude Code + Playwright MCP**
 
 ## Mimari Karar (BAĞLAYICI)
 
@@ -13,39 +13,35 @@ AI araçları için: [CLAUDE.md](CLAUDE.md) · [AGENTS.md](AGENTS.md). Bu karard
 
 ## Mimari Kurallar (bozulmaması gerekenler)
 
-1. **Tek state kaynağı: `TestWorld`.** Tüm senaryo state'i World'de.
-2. **Kanallar yalnızca `store` üzerinden konuşur.** API yazar, Web/Mobile okur.
-   Hiçbir step başka kanalın objesine dokunmaz. `arch:check` ile zorlanır.
-3. **Store anahtarları tipli** (`defineKey<T>`). Raw `Map<string, any>` yasak.
-4. **Her senaryo verisini API ile üretir; `cleanup.register` ile temizler.**
-5. **Secrets `env`'den** (`.env`), asla kodda değil.
-6. **Locator: dirençli strateji** (`resilient-locator`) — testId → role → metin.
+1. **Tek runner: Playwright Test.** Testler `*.spec.ts` (`tests/<domain>/`); DI fixtures ile.
+2. **Kanallar yalnızca tipli `store` (fixture) üzerinden konuşur.** Hiçbir adapter başka
+   kanalın adapter'ına dokunmaz. `arch:check` ile zorlanır.
+3. **Test/task somut adapter'a değil port'a bağlanır** (fixture enjeksiyonu); tool-bağlı
+   kod yalnızca `src/adapters/**`.
+4. **Store anahtarları tipli** (`defineKey<T>`). Raw `Map<string, any>` yasak.
+5. **Üretilen veriyi `cleanup.register` ile üretimle aynı yerde kaydet** (LIFO teardown).
+6. **Secrets `env`'den** (`.env`), asla kodda değil. Locator: `resilient-locator` (testId → role → metin).
 
 ## Dizin Yapısı
 
 ```
 src/
-  support/
-    world.ts             # TestWorld — tek state kaynağı
-    hooks.ts             # tag bazlı kanal init (+ Keycloak auth) + teardown
-    store.ts             # TypedStore
-    store-keys.ts        # defineKey<T> anahtar kataloğu
-    cleanup-registry.ts  # teardown (LIFO)
-    resilient-locator.ts # self-healing temeli (çoklu strateji + healing seam)
-    config/env.ts        # secrets + ortam, fail-fast (dotenv)
   core/
     ports/     # tool-bağımsız arayüzler (örn. IssuePort) — ADR-0001
-    fixtures/  # Playwright fixtures (DI)
+    fixtures/  # Playwright fixtures (DI: store, cleanup, apiRequest, port'lar)
   adapters/    # port implementasyonları (tool-bağlı): api/ web/ mobile/ db/ contract/
   tasks/       # kompoze edilebilir iş görevleri (chaining)
   factories/   # test verisi builder'ları
-  channels/    # (geçiş) cucumber yolu — auth-api.ts vb.
-  steps/   api/ web/ mobile/ db/ common/   # (geçiş) cucumber step'leri
-tests/   <domain>/   # Playwright Test spec'leri (domain bazlı)
-features/  cross-channel/*.feature
-.claude/   CLAUDE.md kuralları + hooks + skills + agents (Claude Code)
+  channels/    # api/ (auth-api) · db/ (db-client stub)
+  support/
+    store.ts · store-keys.ts   # TypedStore + tipli anahtarlar
+    cleanup-registry.ts        # teardown (LIFO)
+    resilient-locator.ts       # çoklu strateji + healing seam
+    config/env.ts              # secrets + ortam, fail-fast (dotenv)
+tests/   <domain>/   # Playwright Test spec'leri (*.spec.ts, domain bazlı)
+test/    unit/       # framework self-test (node:test)
+.claude/   CLAUDE.md kuralları + skills + agents (Claude Code)
 .mcp.json  Playwright MCP (locator keşfi)
-.vscode/   cucumber step navigasyonu
 ```
 
 ## Kurulum
@@ -54,22 +50,16 @@ features/  cross-channel/*.feature
 npm install
 npx playwright install
 cp .env.example .env        # gerçek değerleri gir
-# Allure CLI: brew install allure   (veya npm i -g allure-commandline)
 ```
-
-> Feature dosyaları teslimde `.txt`; çalıştırmadan önce `.feature` yap.
 
 ## Komutlar
 
 ```bash
-npm run typecheck            # tip
-npm run arch:check           # kanal izolasyonu
-npm run test:dry             # step eşleşmesi
-npm test                     # tüm suite
-npm run test:cross-channel   # @cross-channel
-npm run test:parallel        # paralel
-npm run allure:serve         # Allure rapor (hızlı önizleme)
-npm run allure:generate && npm run allure:open
+npm run typecheck   # tip
+npm run arch:check  # ports/adapters katmanlama
+npm run test:unit   # framework self-test
+npm run test:list   # Playwright testlerini derle + listele (backend/browser gerekmez)
+npm test            # tüm Playwright suite (gerçek backend + browser)
 ```
 
 ## API Şema Varsayımları (DOĞRULA)
@@ -89,5 +79,6 @@ request/response alan adları). Auth için `auth-api.ts`: password grant +
 ## CI Sırası
 
 ```
-typecheck -> arch:check -> test:dry -> test:smoke -> test (parallel) -> allure:generate
+typecheck -> arch:check -> test:unit -> test:list
 ```
+(Gerçek e2e koşusu — `npm test` — backend + browser + secret ister; CI'da koşmaz.)

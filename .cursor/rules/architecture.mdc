@@ -9,8 +9,8 @@ Tam metin: `docs/adr/0001-test-otomasyon-mimarisi.md` · Ayrıca `AGENTS.md`.
 Bu karardan sapmak YENİ BİR ADR gerektirir; tek PR içinde sessizce sapma YASAK.
 Çakışma görürsen DUR ve kullanıcıya söyle.
 
-- Runner = **Playwright Test** (yeni testler `*.spec.ts` / `playwright-bdd`).
-  `cucumber-js`'e yeni bağımlılık/senaryo ekleme.
+- Runner = **Playwright Test** (TEK runner, `*.spec.ts`).
+  `cucumber-js` emekli — geri ekleme. (Gherkin gerekirse `playwright-bdd` opsiyonel.)
 - **Ports & Adapters:** test/step somut client'a değil **port arayüzüne** bağlanır;
   adapter **fixture** ile enjekte edilir. Tool-bağlı kod yalnızca `src/adapters/**`.
 - **Screenplay YASAK.** Chaining = `src/tasks/**` altındaki kompoze görevler.

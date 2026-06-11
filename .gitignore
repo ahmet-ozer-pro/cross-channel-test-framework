@@ -3,13 +3,6 @@ dist/
 reports/
 test-results/
 
-# Üretilen feature'lar — .feature.txt tek kaynak; .feature build artifact (prepare-features)
-features/**/*.feature
-
-# Allure
-allure-results/
-allure-report/
-
 # Secrets — kritik
 .env
 *.local

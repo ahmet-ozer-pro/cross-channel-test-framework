@@ -15,8 +15,8 @@ kendi başına bozma.
 
 ## Bağlayıcı özet (tam metin ADR-0001'de)
 
-1. **Runner = Playwright Test.** Yeni testler `*.spec.ts` ya da `playwright-bdd` ile
-   `*.feature`. `cucumber-js`'e yeni bağımlılık/senaryo EKLEME.
+1. **Runner = Playwright Test (TEK runner).** Testler `*.spec.ts` (`tests/<domain>/`).
+   `cucumber-js` emekli — geri EKLEME. (Gherkin gerekirse `playwright-bdd` opsiyonel.)
 2. **Ports & Adapters.** Test/step somut client'a değil **port arayüzüne** bağlanır;
    adapter **fixture** ile enjekte edilir. Tool-bağlı kod (Playwright/Appium/pg/Pact)
    YALNIZCA `src/adapters/**` altında.
@@ -30,11 +30,11 @@ kendi başına bozma.
 
 ## Doğrulama (bir değişikliği "bitti" demeden önce)
 
-`npm run typecheck && npm run arch:check && npm run test:dry && npm run test:unit`
+`npm run typecheck && npm run arch:check && npm run test:unit && npm run test:list`
 dördü de temiz geçmeli.
 
 ## Migrasyon notu
 
-Bu repo cucumber-js'ten Playwright Test'e **evrimsel** geçiyor. Mevcut cucumber
-senaryoları geçiş köprüsünde yaşar; YENİ kod ADR-0001 yönünde yazılır. Çakışmada
+Bu repo cucumber-js'ten Playwright Test'e geçişi TAMAMLADI (cucumber emekli). YENİ
+kod ADR-0001 yönünde yazılır; tek runner Playwright Test. Çakışmada
 ADR-0001 önceliklidir.

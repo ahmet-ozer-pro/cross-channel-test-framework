@@ -9,7 +9,7 @@ name: CI
 #   ve davranış (unit) testleri koşulur. Gerçek e2e koşusu ayrı/manuel.
 #
 # NEDEN `npx playwright install` YOK:
-#   test:dry browser açmaz, unit testler de gerçek browser gerektirmez.
+#   test:list (keşif) browser açmaz, unit testler de gerçek browser gerektirmez.
 #   Browser indirmesi eklenmedi — job hızlı kalsın.
 
 on:
@@ -20,12 +20,12 @@ on:
 
 jobs:
   gates:
-    name: typecheck · arch · dry-run · unit
+    name: typecheck · arch · unit · test-list
     runs-on: ubuntu-latest
 
     # CI PLACEHOLDER ENV — gerçek koşu DEĞİL, gerçek secret DEĞİL.
     # env.ts içindeki required('BASE_URL'/'ADMIN_USER'/'ADMIN_PASS') fail-fast'i
-    # modül import edilir edilmez tetikleniyor; test:dry de env.ts'i çekiyor.
+    # modül import edilir edilmez tetikleniyor; test:list de fixtures→env.ts'i çekiyor.
     # Bu dummy değerler yalnızca o fail-fast'i geçmek için (hiçbir yere istek atılmaz).
     env:
       BASE_URL: https://ci.invalid
@@ -48,19 +48,13 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Arch check (kanal izolasyonu)
+      - name: Arch check (ports/adapters katmanlama)
         run: npm run arch:check
-
-      - name: Feature hazırla (.feature.txt -> .feature)
-        run: npm run features:prepare
-
-      - name: Dry-run (step binding — 0 undefined olmalı)
-        run: npm run test:dry
 
       - name: Unit testler (framework self-test)
         run: npm run test:unit
 
-      # Playwright Test (ADR-0001 yeni runner) — keşif/derleme. Gerçek e2e backend ister,
+      # Playwright Test (ADR-0001 tek runner) — keşif/derleme. Gerçek e2e backend ister,
       # CI'da RUN edilmez; --list ile testlerin derlendiği + bulunduğu doğrulanır (browser indirmez).
-      - name: E2E keşif (Playwright Test --list)
-        run: npm run test:e2e:list
+      - name: Test keşfi (Playwright Test --list)
+        run: npm run test:list

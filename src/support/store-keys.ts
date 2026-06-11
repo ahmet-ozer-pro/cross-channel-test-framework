@@ -13,6 +13,8 @@
  *   Okuma serbest, yazma sahibi kanala aittir. Bu konvansiyon karışıklığı önler.
  */
 
+import type { Issue } from '../core/ports/issue-port';
+
 export interface StoreKey<T> {
   readonly id: string;
   /** Phantom type marker — T'yi compile-time'da taşır, runtime'da asla set edilmez. */
@@ -42,10 +44,8 @@ export const Keys = {
   // --- API kanalı yazar ---
   USER_TOKEN: defineKey<string>('USER_TOKEN'),
 
-  // Domain anahtarları buraya eklenir (tek değer → defineKey, koleksiyon → defineCollectionKey).
-  // Örn. task-manager domaini için:
-  //   CREATED_ISSUES: defineCollectionKey<Issue>('CREATED_ISSUES'),   // API push'lar, Web getAll okur
-  //   ACTIVE_PROJECT_KEY: defineKey<string>('ACTIVE_PROJECT_KEY'),
+  // Üretilen issue'ları biriktirir (chaining/toplu doğrulama). API push'lar, Web getAll okur.
+  CREATED_ISSUES: defineCollectionKey<Issue>('CREATED_ISSUES'),
 
   // --- Web kanalı yazar ---
   // (örnek) WEB_SELECTED_ROW_INDEX: defineKey<number>('WEB_SELECTED_ROW_INDEX'),

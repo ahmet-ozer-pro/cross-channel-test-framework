@@ -5,7 +5,7 @@ Bu repoda mimari **bağlayıcıdır**. Kod önermeden önce
 ve [../AGENTS.md](../AGENTS.md) kurallarına uy.
 
 Özet (tam metin ADR-0001'de) — bunlardan sapma YENİ BİR ADR gerektirir:
-- Runner = **Playwright Test** (yeni testler; `cucumber-js`'e ekleme yapma).
+- Runner = **Playwright Test** (TEK runner, `*.spec.ts`); `cucumber-js` emekli, geri ekleme.
 - **Ports & Adapters:** test/step somut client'a değil **port**'a bağlanır, adapter
   **fixture** ile enjekte edilir; tool-bağlı kod yalnızca `src/adapters/**`.
 - **Screenplay YASAK**; chaining `src/tasks/**` görevleriyle.
