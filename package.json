@@ -4,8 +4,8 @@
   "description": "Cross-channel (API + Web + Mobile + DB + Contract) test automation framework (Playwright Test)",
   "type": "commonjs",
   "scripts": {
-    "test": "playwright test",
-    "test:list": "playwright test --list",
+    "test": "bddgen && playwright test",
+    "test:list": "bddgen && playwright test --list",
     "test:unit": "node --require ts-node/register/transpile-only --test test/unit/*.test.ts",
     "arch:check": "depcruise src --config .dependency-cruiser.js",
     "typecheck": "tsc --noEmit"
@@ -15,6 +15,7 @@
     "@types/node": "^22.10.0",
     "dependency-cruiser": "^16.8.0",
     "dotenv": "^17.4.2",
+    "playwright-bdd": "^9.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   }

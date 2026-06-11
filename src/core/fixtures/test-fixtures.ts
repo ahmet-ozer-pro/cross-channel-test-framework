@@ -1,4 +1,7 @@
-import { test as base, request as playwrightRequest, type APIRequestContext } from '@playwright/test';
+// base = playwright-bdd'nin test'i (Playwright Test'in süpersetı): hem .feature step'leri
+// hem saf .spec.ts AYNI fixtures üzerinde koşsun diye (ADR-0001 — tek runner, BDD korunur).
+import { test as base } from 'playwright-bdd';
+import { request as playwrightRequest, type APIRequestContext } from '@playwright/test';
 import { TypedStore } from '../../support/store';
 import { CleanupRegistry } from '../../support/cleanup-registry';
 import { AuthApi } from '../../channels/api/auth-api';

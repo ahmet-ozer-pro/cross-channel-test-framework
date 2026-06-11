@@ -11,10 +11,18 @@ description: Yeni bir cross-channel test senaryosu (API ile üretip web/mobil/db
    adapter ile enjekte eder). Mega-fixture yapma.
 3. **Factory + task.** `src/factories/<x>-factory.ts` (benzersiz veri) ve
    `src/tasks/<x>-tasks.ts` (üret + cleanup.register AYNI yerde + store'a yaz).
-4. **Spec yaz.** `tests/<domain>/<isim>.spec.ts`. Test somut adapter'a değil **port
-   fixture'ına** bağlanır; web doğrulaması Page Object (POM) üzerinden; `expect` ile assert.
-5. **Doğrula.** typecheck → arch:check → test:list → (backend varsa) `npm test`.
+4. **Senaryoyu yaz — iki biçimden biri (ADR-0001, ikisi de geçerli):**
+   - **BDD/Gherkin (tercih edilen iş-okunur yol):** `tests/<domain>/<isim>.feature` +
+     `src/steps/<x>.steps.ts`. Step'ler `createBdd(test)` ile yazılır (fixtures'a bağlanır);
+     senaryo state'i tipli store ile taşınır (When push'lar, Then okur). Ayrı World yok.
+   - **Saf spec:** `tests/<domain>/<isim>.spec.ts`. Aynı runner'da yan yana koşar.
+   Her iki biçimde de: test/step somut adapter'a değil **port fixture'ına** bağlanır;
+   web doğrulaması Page Object (POM) üzerinden; `expect` ile assert.
+5. **Doğrula.** typecheck → arch:check → test:list (bddgen `.feature`'ı derler) →
+   (backend varsa) `npm test`.
 
 ## Kurallar
 - Her senaryo kendi verisini üretir; benzersiz olsun (randomUUID — paralel güvenlik).
-- Test/task somut client'a değil port'a bağlanır. Ham Playwright page çağrısını spec'e sızdırma.
+- Test/step/task somut client'a değil port'a bağlanır. Ham Playwright page çağrısını
+  step/spec'e sızdırma (POM kullan).
+- Gherkin'i tamamen kaldırma; bu bağlayıcı karar, değişmesi yeni ADR ister.

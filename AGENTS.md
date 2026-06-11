@@ -15,8 +15,10 @@ kendi başına bozma.
 
 ## Bağlayıcı özet (tam metin ADR-0001'de)
 
-1. **Runner = Playwright Test (TEK runner).** Testler `*.spec.ts` (`tests/<domain>/`).
-   `cucumber-js` emekli — geri EKLEME. (Gherkin gerekirse `playwright-bdd` opsiyonel.)
+1. **Runner = Playwright Test (TEK runner).** Senaryolar Gherkin `.feature` (playwright-bdd
+   ile derlenir) ve/veya saf `*.spec.ts` — ikisi aynı runner'da yan yana (`tests/<domain>/`),
+   step'ler `src/steps/`. **BDD/Gherkin KORUNUR.** Eski `cucumber-js` RUNNER'ı kaldırıldı —
+   geri EKLEME; AYRI runner getirme. Gherkin'i kaldırmak YENİ BİR ADR gerektirir.
 2. **Ports & Adapters.** Test/step somut client'a değil **port arayüzüne** bağlanır;
    adapter **fixture** ile enjekte edilir. Tool-bağlı kod (Playwright/Appium/pg/Pact)
    YALNIZCA `src/adapters/**` altında.
@@ -35,6 +37,6 @@ dördü de temiz geçmeli.
 
 ## Migrasyon notu
 
-Bu repo cucumber-js'ten Playwright Test'e geçişi TAMAMLADI (cucumber emekli). YENİ
-kod ADR-0001 yönünde yazılır; tek runner Playwright Test. Çakışmada
-ADR-0001 önceliklidir.
+Bu repo, RUNNER'ı cucumber-js'ten Playwright Test'e taşıdı; **Gherkin katmanı korundu**
+(playwright-bdd ile aynı runner'da). YENİ kod ADR-0001 yönünde yazılır; tek runner
+Playwright Test, BDD `.feature` ve `.spec.ts` yan yana. Çakışmada ADR-0001 önceliklidir.

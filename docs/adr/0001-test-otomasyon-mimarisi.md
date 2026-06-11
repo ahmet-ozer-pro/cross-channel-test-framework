@@ -25,10 +25,18 @@ doğru ama iki eksik var: (1) ölçek-execution makinesi (sharding/trace/retry),
 **Fixture-tabanlı dependency injection + Ports-and-Adapters + Page/Screen Object
 + task kompozisyonu + data factory, domain'e göre organize.** Screenplay DEĞİL.
 
-Pivot: **runner = Playwright Test (TEK runner).** Testler saf `*.spec.ts`.
-cucumber-js EMEKLİYE AYRILDI (köprü kaldırıldı — fixtures/sharding/trace tek runner'da).
-İş-okunur Gherkin gerekirse `playwright-bdd` ile aynı runner üzerinde İLERİDE eklenebilir
-(opsiyonel); bu karar geri-dönüşlü kalır, bugün gerekmez.
+Pivot: **runner = Playwright Test (TEK runner).** Senaryolar iki biçimde yazılabilir ve
+ikisi AYNI runner'da yan yana koşar: iş-okunur **Gherkin `.feature`** (playwright-bdd ile
+derlenir) ve saf **`*.spec.ts`**. **BDD/Gherkin KORUNUR** — `playwright-bdd` Gherkin'i
+Playwright Test'in üstünde derler; fixtures/sharding/trace/retry hepsi ortak.
+
+Bu iki AYRI karardır, karıştırma: (a) **runner** cucumber-js → Playwright Test'e geçti;
+(b) **Gherkin katmanı** korundu (playwright-bdd'ye taşındı). cucumber-js paketi (eski
+runner) kaldırıldı; Gherkin sözdizimi kalmaya devam ediyor.
+
+**REDDEDİLEN seçenek (kayıt):** "Gherkin'i tamamen at, yalnızca `.spec.ts`'e geç" değer-
+lendirildi ve REDDEDİLDİ — geri dönüşü zor (tek-yönlü kapı), proje kimliği BDD, paydaş
+okunabilirliği değerli. Gherkin'i kaldırmak için YENİ BİR ADR gerekir; sessiz sapma yasak.
 
 ### Neden bu, neden Screenplay değil
 - Fixtures, TS/JS dünyasının güncel DI mekanizması; Screenplay'in kompozisyon
@@ -40,9 +48,11 @@ cucumber-js EMEKLİYE AYRILDI (köprü kaldırıldı — fixtures/sharding/trace
 
 ## Bağlayıcı kurallar (atlanamaz / bozulamaz)
 
-1. **Runner:** TEK runner **Playwright Test**; testler `*.spec.ts` (`tests/<domain>/`).
-   `cucumber-js` emekli — geri eklenmez. (Gherkin gerekirse `playwright-bdd` aynı
-   runner üzerinde opsiyonel; ayrı runner getirme.)
+1. **Runner:** TEK runner **Playwright Test**. Senaryolar Gherkin `.feature`
+   (`tests/<domain>/`, playwright-bdd ile derlenir) VEYA saf `*.spec.ts` olabilir; ikisi
+   aynı runner'da yan yana koşar. **BDD/Gherkin korunur (playwright-bdd).** Eski
+   `cucumber-js` RUNNER'ı kaldırıldı — geri eklenmez; AYRI bir runner getirme. Gherkin'i
+   tamamen kaldırmak ayrı bir karardır ve YENİ BİR ADR gerektirir.
 2. **Ports & Adapters:** Test/step kodu somut kanal client'ına (`IssueApi`,
    `IssueBoardPage`…) DOĞRUDAN bağlanmaz. **Port arayüzüne** bağlanır; somut adapter
    **fixture ile enjekte** edilir. Tool-bağlı kod (Playwright/Appium/pg/Pact) YALNIZCA
@@ -78,15 +88,18 @@ src/
     web/ api/ db/ mobile/ contract/
   tasks/           # kompoze edilebilir iş görevleri (chaining)
   factories/       # test verisi builder'ları
+  steps/           # Gherkin step-def'leri (createBdd(test) → fixtures'a bağlanır)
 tests/
-  <domain>/        # issue/ proje/ board/ ...  → DOMAIN bazlı (*.spec.ts)
-playwright.config.ts   # projects (kanal/ortam), sharding, retry, trace, reporter
+  <domain>/        # issue/ proje/ board/ ...  → DOMAIN bazlı (*.feature ve/veya *.spec.ts)
+playwright.config.ts   # defineBddConfig (Gherkin→spec) + projects, sharding, retry, trace
+.features-gen/         # playwright-bdd ÜRETİMİ (gitignore'lu, commit edilmez)
 ```
 
 **Korunan:** tipli store, cleanup disiplini, resilient-locator, dependency-cruiser,
 CI gate'leri, env fail-fast.
-**Tamamlanan geçiş:** runner cucumber-js → Playwright Test (cucumber EMEKLİ),
-kanal client → port+adapter, hooks/world → fixtures, auth → fixture.
+**Tamamlanan geçiş:** RUNNER cucumber-js → Playwright Test; Gherkin katmanı korundu
+(playwright-bdd ile aynı runner'a taşındı), kanal client → port+adapter,
+hooks/world → fixtures, auth → fixture.
 **Sıradaki:** ilk domain dilimi (Issue), sonra tasks/factory, DB/Mobile/Contract,
 sharding + flake politikası.
 

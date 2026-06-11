@@ -1,7 +1,7 @@
 # Cross-Channel Test Framework
 
 Cross-channel (API + Web + Mobile + DB + Contract) test otomasyonu.
-Stack: TypeScript · **Playwright Test** · (Appium / Pact — sonraki fazlar).
+Stack: TypeScript · **Playwright Test** · **playwright-bdd (Gherkin)** · (Appium / Pact — sonraki fazlar).
 
 Bu repo iskelet aşamasında: domain implementasyonları henüz yok, mimari guardrail'lar yerinde.
 Hedef: hızlı büyürken mimari olgunluğu korumak.
@@ -14,7 +14,9 @@ Hedef: hızlı büyürken mimari olgunluğu korumak.
 > PR/commit içinde sessizce sapma YASAKTIR.**
 
 Özet (tam metin ADR-0001'de):
-- **Runner = Playwright Test (TEK runner).** Testler `*.spec.ts` (`tests/<domain>/`).
+- **Runner = Playwright Test (TEK runner).** Senaryolar Gherkin `.feature` (playwright-bdd
+  ile derlenir) ve/veya saf `*.spec.ts` — ikisi aynı runner'da yan yana (`tests/<domain>/`).
+  **BDD/Gherkin korunur.** Step'ler `src/steps/`.
 - **Ports & Adapters:** Test/task somut client'a (`IssueApi`…) değil **port arayüzüne**
   bağlanır; adapter **fixture** ile enjekte edilir. Tool-bağlı kod yalnızca `src/adapters/**`.
 - **Screenplay YASAK.** Chaining `src/tasks/**` altındaki kompoze edilebilir görevlerle.
@@ -48,7 +50,8 @@ Hedef: hızlı büyürken mimari olgunluğu korumak.
 - Mobile Screen Object → `*.screen.ts` (`adapters/mobile/`)
 - Port (arayüz) → `*-port.ts` (`core/ports/`) · Adapter → `*.api-adapter.ts` (`adapters/<kanal>/`)
 - Task → `*-tasks.ts` (`tasks/`) · Factory → `*-factory.ts` (`factories/`)
-- Spec → `*.spec.ts` (`tests/<domain>/`)
+- Spec → `*.spec.ts` (`tests/<domain>/`) · Gherkin → `*.feature` (`tests/<domain>/`)
+- Step-def → `*.steps.ts` (`src/steps/`) — `createBdd(test)` ile fixtures'a bağlanır
 
 ## Kod Standardı
 
@@ -59,9 +62,11 @@ Hedef: hızlı büyürken mimari olgunluğu korumak.
 
 ## Faz Durumu
 
-- Runner: cucumber-js EMEKLİ; tek runner Playwright Test (ADR-0001).
-- Çekirdek: ports/adapters + fixtures + dependency-cruiser + CI — kuruldu.
-- Sıradaki: ilk domain dikey dilimi (Issue: port+adapter+fixture+task+POM+spec).
+- Runner: TEK runner Playwright Test (ADR-0001). Eski cucumber-js RUNNER'ı kaldırıldı.
+- BDD/Gherkin KORUNUR: `.feature` senaryoları `playwright-bdd` ile Playwright Test üstünde
+  derlenir; `.feature` ve `.spec.ts` aynı runner'da yan yana koşar. Step'ler `src/steps/`.
+- Çekirdek: ports/adapters + fixtures + dependency-cruiser + CI + playwright-bdd — kuruldu.
+- Sıradaki: ikinci domain dilimi / tag taksonomisi; gerçek API'ye bağlama (bind-stub).
 - Faz 2/4/5: DB · Mobile (Appium) · Contract (Pact) — bekliyor.
 
 ## Tamamlandı Demeden Önce

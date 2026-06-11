@@ -13,7 +13,9 @@ AI araçları için: [CLAUDE.md](CLAUDE.md) · [AGENTS.md](AGENTS.md). Bu karard
 
 ## Mimari Kurallar (bozulmaması gerekenler)
 
-1. **Tek runner: Playwright Test.** Testler `*.spec.ts` (`tests/<domain>/`); DI fixtures ile.
+1. **Tek runner: Playwright Test.** Senaryolar Gherkin `.feature` (playwright-bdd ile
+   derlenir, step'ler `src/steps/`) ve/veya saf `*.spec.ts` — ikisi yan yana, DI fixtures
+   ile (`tests/<domain>/`). **BDD/Gherkin korunur.**
 2. **Kanallar yalnızca tipli `store` (fixture) üzerinden konuşur.** Hiçbir adapter başka
    kanalın adapter'ına dokunmaz. `arch:check` ile zorlanır.
 3. **Test/task somut adapter'a değil port'a bağlanır** (fixture enjeksiyonu); tool-bağlı
@@ -32,13 +34,14 @@ src/
   adapters/    # port implementasyonları (tool-bağlı): api/ web/ mobile/ db/ contract/
   tasks/       # kompoze edilebilir iş görevleri (chaining)
   factories/   # test verisi builder'ları
+  steps/       # Gherkin step-def'leri (createBdd(test) → fixtures)
   channels/    # api/ (auth-api) · db/ (db-client stub)
   support/
     store.ts · store-keys.ts   # TypedStore + tipli anahtarlar
     cleanup-registry.ts        # teardown (LIFO)
     resilient-locator.ts       # çoklu strateji + healing seam
     config/env.ts              # secrets + ortam, fail-fast (dotenv)
-tests/   <domain>/   # Playwright Test spec'leri (*.spec.ts, domain bazlı)
+tests/   <domain>/   # Gherkin *.feature ve/veya *.spec.ts (domain bazlı)
 test/    unit/       # framework self-test (node:test)
 .claude/   CLAUDE.md kuralları + skills + agents (Claude Code)
 .mcp.json  Playwright MCP (locator keşfi)

@@ -11,6 +11,9 @@ test-results/
 /playwright-report/
 /blob-report/
 
+# playwright-bdd — .feature'lardan üretilen spec'ler (derleme çıktısı, commit edilmez)
+/.features-gen/
+
 # OS
 .DS_Store
 
