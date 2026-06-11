@@ -33,8 +33,8 @@ export interface LocatorStrategy {
  * katmanı bu noktaya — son strateji de tutmadığında — eklenir; Page Object'ler
  * değişmez, sadece bu dosya değişir. describe alanları o katman ve teşhis için saklanır.
  *
- * STRICT-MODE: OR'lanmış locator birden çok element'e resolve olabilir — aynı evrak
- * no hem testId-scoped metinde HEM ham getByText'te tutarsa toBeVisible() strict-mode
+ * STRICT-MODE: OR'lanmış locator birden çok element'e resolve olabilir — aynı değer
+ * hem testId-scoped metinde HEM ham getByText'te tutarsa toBeVisible() strict-mode
  * ihlaliyle patlardı. Sonucu .first() ile tek element'e indiriyoruz. Bu indirgemeyi
  * TEK NOKTADA (burada) yapıyoruz; her çağıran Page Object otomatik korunur, kendi
  * tarafında .first() tekrarlamak zorunda kalmaz.

@@ -33,11 +33,15 @@ src/
     cleanup-registry.ts  # teardown (LIFO)
     resilient-locator.ts # self-healing temeli (çoklu strateji + healing seam)
     config/env.ts        # secrets + ortam, fail-fast (dotenv)
-  channels/
-    api/   auth-api.ts (Keycloak), document-api.ts
-    web/   document-list.page.ts (POM, dirençli locator)
-    mobile/ db/   (sonraki fazlar)
-  steps/   api/ web/ mobile/ db/ common/
+  core/
+    ports/     # tool-bağımsız arayüzler (örn. IssuePort) — ADR-0001
+    fixtures/  # Playwright fixtures (DI)
+  adapters/    # port implementasyonları (tool-bağlı): api/ web/ mobile/ db/ contract/
+  tasks/       # kompoze edilebilir iş görevleri (chaining)
+  factories/   # test verisi builder'ları
+  channels/    # (geçiş) cucumber yolu — auth-api.ts vb.
+  steps/   api/ web/ mobile/ db/ common/   # (geçiş) cucumber step'leri
+tests/   <domain>/   # Playwright Test spec'leri (domain bazlı)
 features/  cross-channel/*.feature
 .claude/   CLAUDE.md kuralları + hooks + skills + agents (Claude Code)
 .mcp.json  Playwright MCP (locator keşfi)
@@ -70,18 +74,17 @@ npm run allure:generate && npm run allure:open
 
 ## API Şema Varsayımları (DOĞRULA)
 
-`src/channels/api/document-api.ts` en üstündeki sabitler Türksat test ortamına
-göre teyit edilmeli: `ENDPOINT`, `REQ_TITLE_FIELD`, `RESP_ID_FIELD`,
-`RESP_NUMBER_FIELD` (evrakNo vs evrakSayi). Auth için `auth-api.ts`: password
-grant + `AUTH_URL`/`AUTH_CLIENT_ID`. `AUTH_URL` boşsa token akışı atlanır.
+Domain adapter'ları (`src/adapters/api/*-adapter.ts`) gerçek endpoint'e bağlanırken
+yol/alan sabitleri test ortamına göre teyit edilmeli (örn. issue oluşturma yolu,
+request/response alan adları). Auth için `auth-api.ts`: password grant +
+`AUTH_URL`/`AUTH_CLIENT_ID`. `AUTH_URL` boşsa token akışı atlanır.
 
 ## Faz Durumu
 
-- Faz 1: Web + API + auth + dirençli locator + Allure — bind-ready (şema sabitleri bekliyor)
-- Faz 2: DB (SQL + NoSQL) — stub
-- Faz 3: Cross-channel senaryolar — örnek hazır
-- Faz 4: Mobile (Appium) — bekliyor
-- Faz 5: Contract (Pact) — bekliyor
+- Domain: **task/issue yönetimi** (Jira benzeri). Önceki örnek domain kaldırıldı.
+- Çekirdek mimari: ADR-0001 (ports/adapters + Playwright Test fixtures) — kuruldu.
+- Faz B: ilk domain dikey dilimi (Issue: port+adapter+fixture+spec) — sıradaki.
+- Faz 2/4/5: DB · Mobile (Appium) · Contract (Pact) — bekliyor.
 
 ## CI Sırası
 

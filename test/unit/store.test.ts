@@ -16,7 +16,7 @@ describe('TypedStore — tek değer (set/get/has)', () => {
 
   test('set/get: yazılan değeri tip-doğru döndürür', () => {
     const store = new TypedStore();
-    const key = defineKey<string>('DOC_ID');
+    const key = defineKey<string>('ITEM_ID');
     store.set(key, 'abc-123');
     assert.equal(store.get(key), 'abc-123');
   });
@@ -41,7 +41,7 @@ describe('TypedStore — tek değer (set/get/has)', () => {
 describe('TypedStore — koleksiyon (push/getAll/last/initCollection)', () => {
   test('push → getAll: ekleme sırasını korur', () => {
     const store = new TypedStore();
-    const key = defineCollectionKey<string>('DOCS');
+    const key = defineCollectionKey<string>('ITEMS');
     store.push(key, 'a');
     store.push(key, 'b');
     store.push(key, 'c');

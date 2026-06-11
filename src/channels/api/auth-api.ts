@@ -4,7 +4,7 @@ import { env } from '../../support/config/env';
 /**
  * AuthApi — Keycloak'tan access token alır.
  *
- * ŞEMA VARSAYIMLARI — Türksat test ortamına göre DOĞRULA:
+ * ŞEMA VARSAYIMLARI — gerçek test ortamına göre DOĞRULA:
  *  - Password grant kullanılıyor (resource owner password credentials).
  *  - Token endpoint'in tam yolu env.AUTH_URL içinde.
  *  - client_id env.AUTH_CLIENT_ID içinde.

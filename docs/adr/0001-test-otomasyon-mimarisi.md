@@ -43,8 +43,8 @@ yani Gherkin'i bırakma kararı GERİ-DÖNÜŞLÜ kalır, bugün verilmek zorund
 1. **Runner:** Yeni testler **Playwright Test** üzerinde koşar (saf `*.spec.ts` ya da
    `playwright-bdd` ile `*.feature`). `cucumber-js`'e YENİ bağımlılık/senaryo eklenmez;
    mevcut cucumber senaryoları geçiş köprüsünde yaşar, çoğaltılmaz.
-2. **Ports & Adapters:** Test/step kodu somut kanal client'ına (`DocumentApi`,
-   `DocumentListPage`…) DOĞRUDAN bağlanmaz. **Port arayüzüne** bağlanır; somut adapter
+2. **Ports & Adapters:** Test/step kodu somut kanal client'ına (`IssueApi`,
+   `IssueBoardPage`…) DOĞRUDAN bağlanmaz. **Port arayüzüne** bağlanır; somut adapter
    **fixture ile enjekte** edilir. Tool-bağlı kod (Playwright/Appium/pg/Pact) YALNIZCA
    `src/adapters/**` altında bulunur.
 3. **Screenplay YASAK.** Kompozisyon `src/tasks/**` altındaki düz fonksiyonlarla yapılır;
@@ -53,7 +53,7 @@ yani Gherkin'i bırakma kararı GERİ-DÖNÜŞLÜ kalır, bugün verilmek zorund
    konuşur. Bir kanalın kodu başka kanalın adapter'ını import etmez (dependency-cruiser
    ile zorlanır).
 5. **Chaining:** Karmaşık/zincirli akışlar `tasks/` altındaki kompoze edilebilir
-   görevlerle kurulur (örn. `createDocument` → `approveDocument`); senaryo içinde ham
+   görevlerle kurulur (örn. `createIssue` → `assignIssue`); senaryo içinde ham
    adapter juggling ile değil. State tipli context + koleksiyon API ile taşınır.
 6. **Organizasyon:** Testler **DOMAIN**'e göre (`tests/<domain>/` veya
    `features/<domain>/`), kanala göre DEĞİL. Disiplinli tag taksonomisi
@@ -78,14 +78,14 @@ yani Gherkin'i bırakma kararı GERİ-DÖNÜŞLÜ kalır, bugün verilmek zorund
 src/
   core/
     fixtures/      # Playwright fixtures = DI (page, apiClient, db, mobile, contract, store)
-    ports/         # ARAYÜZLER (tool-bağımsız): DocumentPort, AuthPort, ...
+    ports/         # ARAYÜZLER (tool-bağımsız): IssuePort, AuthPort, ...
     context/       # tipli cross-channel state (chaining) — bugünkü store evrilir
   adapters/        # port implementasyonları (TOOL-BAĞLI, tek değişim noktası)
     web/ api/ db/ mobile/ contract/
   tasks/           # kompoze edilebilir iş görevleri (chaining)
   factories/       # test verisi builder'ları
 tests/  (veya features/)
-  <domain>/        # evrak/ kullanici/ ...  → DOMAIN bazlı
+  <domain>/        # issue/ proje/ board/ ...  → DOMAIN bazlı
 playwright.config.ts   # projects (kanal/ortam), sharding, retry, trace, reporter
 ```
 

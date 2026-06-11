@@ -9,8 +9,8 @@ import { StoreKey } from './store-keys';
  *  - get() anahtar yoksa FIRLATIR (sessizce undefined dönmez). Eksik veri
  *    cross-channel akışta en sık hata kaynağı; loud fail debug'ı kısaltır.
  *  - Değerler StoreKey<T> üzerinden tipli okunur/yazılır; yanlış tip compile etmez.
- *  - Raw Map<string, any> KULLANILMAZ — bu, belgenet'teki TestContextKeys
- *    monolitine geri dönüş olur.
+ *  - Raw Map<string, any> KULLANILMAZ — bu, tipsiz string-key monolitine
+ *    (eski TestContextKeys benzeri) geri dönüş olur.
  *
  * İKİ NAMESPACE:
  *  - Tek değer: set/get/has  (data)        — ikinci set öncekini EZER (kasıtlı).

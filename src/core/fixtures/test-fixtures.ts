@@ -1,8 +1,6 @@
 import { test as base, request as playwrightRequest, type APIRequestContext } from '@playwright/test';
 import { TypedStore } from '../../support/store';
 import { CleanupRegistry } from '../../support/cleanup-registry';
-import { DocumentApiAdapter } from '../../adapters/api/document.api-adapter';
-import type { DocumentPort } from '../ports/document-port';
 import { env } from '../../support/config/env';
 
 /**
@@ -20,10 +18,9 @@ type TestFixtures = {
   store: TypedStore;
   /** Üretilen verinin temizliği — teardown'da otomatik (LIFO) koşar. */
   cleanup: CleanupRegistry;
-  /** Düşük seviye API request context (auto-dispose). */
+  /** Düşük seviye API request context (auto-dispose). Domain adapter'ları bunu kullanır. */
   apiRequest: APIRequestContext;
-  /** Evrak kanalı — port; somut adapter buraya enjekte edilir. */
-  documentPort: DocumentPort;
+  // Domain port fixture'ları buraya eklenir (örn. issuePort), her biri kendi adapter'ıyla.
 };
 
 export const test = base.extend<TestFixtures>({
@@ -44,9 +41,8 @@ export const test = base.extend<TestFixtures>({
     await context.dispose();
   },
 
-  documentPort: async ({ apiRequest }, use) => {
-    await use(new DocumentApiAdapter(apiRequest));
-  },
+  // Domain port fixture örneği (eklenecek):
+  // issuePort: async ({ apiRequest }, use) => { await use(new IssueApiAdapter(apiRequest)); },
 });
 
 export { expect } from '@playwright/test';

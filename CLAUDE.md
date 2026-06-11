@@ -16,7 +16,7 @@ Hedef: hızlı büyürken mimari olgunluğu korumak.
 Özet (tam metin ADR-0001'de):
 - **Runner = Playwright Test.** Yeni testler burada koşar (`*.spec.ts` ya da
   `playwright-bdd` ile `*.feature`). `cucumber-js`'e yeni bağımlılık/senaryo EKLENMEZ.
-- **Ports & Adapters:** Test/step somut client'a (`DocumentApi`…) değil **port arayüzüne**
+- **Ports & Adapters:** Test/step somut client'a (`IssueApi`…) değil **port arayüzüne**
   bağlanır; adapter **fixture** ile enjekte edilir. Tool-bağlı kod yalnızca `src/adapters/**`.
 - **Screenplay YASAK.** Chaining `src/tasks/**` altındaki kompoze edilebilir görevlerle.
 - **Organizasyon DOMAIN bazlı** (`tests/<domain>/`), kanal bazlı değil.
@@ -42,7 +42,7 @@ Hedef: hızlı büyürken mimari olgunluğu korumak.
 3. Step tanımlarında arrow function KULLANMA. `async function (this: TestWorld) {...}`
    kullan — aksi halde `this`/World bağlanmaz, `this.store` patlar.
 4. Step içine ham Playwright/Appium çağrısı yazma. Her zaman page/screen/client
-   objesi üzerinden git (`DocumentListPage`, `DocumentApi` gibi).
+   objesi üzerinden git (`IssueBoardPage`, `IssueApi` gibi).
 5. Her senaryo verisini API ile üretir ve `this.cleanup.register(...)` ile temizliğini
    ÜRETİMLE AYNI step'te kaydeder. Test verisi birikmez.
 
@@ -82,6 +82,6 @@ implementasyona bağlarken ilgili senaryoyu da yeşile çevir.
 ## Çalışma Tarzı
 
 - Değişiklik yaparken etki analizi yap: bu step/anahtar değişikliği başka senaryoyu
-  bozuyor mu? (belgenet'teki impact-analysis disiplini.)
+  bozuyor mu? (impact-analysis disiplini.)
 - Dosya düzenlemek için `sed` yerine `python3` inline script tercih et.
 - Feature dosyaları teslim/paylaşımda `.txt`; projede `.feature` olarak çalışır.

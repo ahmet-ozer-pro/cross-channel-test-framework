@@ -1,6 +1,6 @@
 /**
  * dependency-cruiser — JS/TS dünyasının ArchUnit'i.
- * belgenet'te ArchUnit ile yaptığın boundary enforcement'ın TypeScript karşılığı.
+ * ArchUnit'le yapılan boundary enforcement'ın TypeScript karşılığı.
  *
  * Burada kanal izolasyonunu YAPISAL olarak zorluyoruz: bir kanalın step'i
  * başka kanalın page/screen/client objesini import EDEMEZ. Kanallar yalnızca

@@ -4,7 +4,7 @@ name: CI
 # Bu job SADECE env-bağımsız gate'leri + framework unit testlerini koşar.
 #
 # NEDEN gerçek suite (npm test) burada KOŞMAZ:
-#   `npm test` gerçek backend (Türksat ortamı) + headless browser + gerçek
+#   `npm test` gerçek backend (test ortamı) + headless browser + gerçek
 #   secret ister. CI'da bunlar yok; bu yüzden sadece statik/yapısal kontroller
 #   ve davranış (unit) testleri koşulur. Gerçek e2e koşusu ayrı/manuel.
 #
