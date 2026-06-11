@@ -62,4 +62,3 @@ implementasyona bağlarken ilgili senaryoyu da yeşile çevir.
   bozuyor mu? (belgenet'teki impact-analysis disiplini.)
 - Dosya düzenlemek için `sed` yerine `python3` inline script tercih et.
 - Feature dosyaları teslim/paylaşımda `.txt`; projede `.feature` olarak çalışır.
-

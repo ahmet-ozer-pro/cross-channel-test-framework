@@ -24,7 +24,10 @@ export class TestWorld extends World {
   private _webContext?: BrowserContext;
   private _page?: Page;
   private _api?: APIRequestContext;
-  // mobile / db handle'ları stub fazda eklenecek (any yerine ileride tipli)
+  // mobile / db: seam HAZIR, tip placeholder (unknown). Gerçek tip Faz 2/4'te
+  // (Appium Browser / pg|mssql|mongo client) bağlanınca daraltılır.
+  private _mobile?: unknown;
+  private _db?: unknown;
 
   constructor(options: IWorldOptions) {
     super(options);
@@ -58,6 +61,40 @@ export class TestWorld extends World {
   }
   setApi(context: APIRequestContext): void {
     this._api = context;
+  }
+  /**
+   * Throw etmeyen erişimci — teardown'da kullanılır. `get api()` set edilmemişse
+   * fırlatır; After hook'u ise API açılmamış (web-only) senaryoda da çalışır,
+   * bu yüzden dispose için sessiz undefined döndüren bu yol gerekir.
+   */
+  get apiContext(): APIRequestContext | undefined {
+    return this._api;
+  }
+
+  // --- Mobile kanalı (Faz 4 — Appium) ---
+  get mobile(): unknown {
+    if (!this._mobile) {
+      throw new Error(
+        '[World] Mobile kanalı initialize edilmedi. Senaryoya @mobile tag ekle (Faz 4).',
+      );
+    }
+    return this._mobile;
+  }
+  setMobile(driver: unknown): void {
+    this._mobile = driver;
+  }
+
+  // --- DB kanalı (Faz 2 — SQL/NoSQL) ---
+  get db(): unknown {
+    if (!this._db) {
+      throw new Error(
+        '[World] DB kanalı initialize edilmedi. Senaryoya @db tag ekle (Faz 2).',
+      );
+    }
+    return this._db;
+  }
+  setDb(client: unknown): void {
+    this._db = client;
   }
 }
 

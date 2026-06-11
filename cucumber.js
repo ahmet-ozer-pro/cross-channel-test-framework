@@ -1,11 +1,9 @@
+const os = require('node:os');
+
 /**
  * Cucumber JS yapılandırması.
- * - require-module ile ts-node devreye girer (TypeScript step'leri doğrudan çalışır).
- * - paths: feature dosyalarının yeri.
- * - require: support + step dosyalarının yeri (recursive).
- *
- * NOT: Bu iskelette feature dosyaları teslim kısıtı nedeniyle .txt uzantılı.
- * Çalıştırmadan önce .feature olarak yeniden adlandır (aşağıdaki glob .feature bekler).
+ * Raporlama: geliştirici için HTML/JSON, paydaş/CI için Allure.
+ * NOT: feature dosyaları teslimde .txt; çalıştırmadan önce .feature yap.
  */
 module.exports = {
   default: {
@@ -16,7 +14,14 @@ module.exports = {
       'progress-bar',
       'html:reports/cucumber-report.html',
       'json:reports/cucumber-report.json',
+      'allure-cucumberjs/reporter',
     ],
-    formatOptions: { snippetInterface: 'async-await' },
+    formatOptions: {
+      snippetInterface: 'async-await',
+      environmentInfo: {
+        os_platform: os.platform(),
+        node_version: process.version,
+      },
+    },
   },
 };

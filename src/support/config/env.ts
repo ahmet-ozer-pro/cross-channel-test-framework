@@ -42,8 +42,12 @@ export const env = {
 
   /** --- Keycloak / API --- */
   AUTH_URL: optional('AUTH_URL', ''),
+  AUTH_CLIENT_ID: optional('AUTH_CLIENT_ID', ''),
 
   /** --- DB (stub fazda boş geçilebilir) --- */
   DB_SQL_URL: optional('DB_SQL_URL', ''),
   DB_NOSQL_URL: optional('DB_NOSQL_URL', ''),
+
+  /** --- Mobile / Appium (Faz 4 — stub fazda boş geçilebilir) --- */
+  APPIUM_URL: optional('APPIUM_URL', ''),
 } as const;

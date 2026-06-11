@@ -19,8 +19,18 @@ export interface StoreKey<T> {
   readonly __valueType?: T;
 }
 
-/** Tipli bir store anahtarı tanımlar. */
+/** Tipli bir store anahtarı tanımlar (tek değer; set/get). */
 export function defineKey<T>(id: string): StoreKey<T> {
+  return { id };
+}
+
+/**
+ * Tipli bir KOLEKSIYON anahtarı tanımlar (push/getAll/last).
+ * Teknik olarak StoreKey<T> ile aynı; ayrı fonksiyon niyeti belgeler:
+ * bu anahtar altında aynı tipte BİRDEN ÇOK entity biriktirilir (chaining,
+ * N-kayıt üretip hepsini doğrulama). Flat set/get namespace'inden bağımsızdır.
+ */
+export function defineCollectionKey<T>(id: string): StoreKey<T> {
   return { id };
 }
 

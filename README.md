@@ -1,98 +1,85 @@
 # Cross-Channel Test Automation Framework
 
 API + Web + Mobile + DB + Contract kanallarını tek bir BDD framework'ünde
-birleştiren cross-channel test otomasyon iskeleti.
+birleştiren cross-channel test otomasyon projesi.
 
-Stack: **TypeScript · Cucumber JS · Playwright · (Appium / Pact / DB — sonraki fazlar)**
-
-> Bu repo şu an **iskelet**. Kanal implementasyonları stub; mimari guardrail'lar
-> ise baştan yerinde. Amaç: hızlı büyürken mimari olgunluğu kaybetmemek.
-
----
+Stack: **TypeScript · Cucumber JS · Playwright · (Appium / Pact — sonraki fazlar)**
+Raporlama: **Allure 2** · AI: **Claude Code + Playwright MCP**
 
 ## Mimari Kurallar (bozulmaması gerekenler)
 
-Bu beş kural framework'ün belkemiği. AI araçlarıyla (Claude Code) geliştirirken
-bile bunları dayat — boilerplate hızlı üretilir, mimari kararları sen verirsin.
-
-1. **Tek state kaynağı: `TestWorld`.**
-   Tüm senaryo state'i World'de yaşar. Global değişken, modül-seviyesi state yok.
-
-2. **Kanallar yalnızca `store` üzerinden konuşur.**
-   API step'i veriyi `store`'a yazar; Web/Mobile step'i okur. Hiçbir step başka
-   kanalın `page`/`driver`/`client` objesine dokunmaz. Bu kural
-   `.dependency-cruiser.js` ile CI'da **yapısal olarak zorlanır** (ArchUnit gibi).
-
-3. **Store anahtarları tipli.** `store-keys.ts` içinde `defineKey<T>` ile tanımlanır.
-   Raw `Map<string, any>` yasak. Bu, `evrakNo`/`evrakSayi` karışıklığını compile
-   zamanında imkansız kılar.
-
-4. **Her senaryo kendi verisini üretir; ürettiğini temizler.**
-   Üretimi yapan step, cleanup'ını aynı yerde `this.cleanup.register(...)` ile
-   kaydeder. `After` hook'u LIFO sırayla hepsini çalıştırır. Test verisi birikmez.
-
-5. **Secrets asla kodda değil.** Tüm credential'lar `env`'den okunur, başlangıçta
-   doğrulanır (fail-fast). `.env` repoya girmez.
-
----
+1. **Tek state kaynağı: `TestWorld`.** Tüm senaryo state'i World'de.
+2. **Kanallar yalnızca `store` üzerinden konuşur.** API yazar, Web/Mobile okur.
+   Hiçbir step başka kanalın objesine dokunmaz. `arch:check` ile zorlanır.
+3. **Store anahtarları tipli** (`defineKey<T>`). Raw `Map<string, any>` yasak.
+4. **Her senaryo verisini API ile üretir; `cleanup.register` ile temizler.**
+5. **Secrets `env`'den** (`.env`), asla kodda değil.
+6. **Locator: dirençli strateji** (`resilient-locator`) — testId → role → metin.
 
 ## Dizin Yapısı
 
 ```
 src/
   support/
-    world.ts            # TestWorld — tek state kaynağı, fail-loud getter'lar
-    hooks.ts            # Tag bazlı kanal init + teardown
-    store.ts            # TypedStore — tip güvenli, eksik anahtarda fırlatır
-    store-keys.ts       # defineKey<T> — anahtar kataloğu + sahiplik
-    cleanup-registry.ts # Teardown disiplini (LIFO)
-    config/env.ts       # Secrets + ortam, fail-fast validation
-  channels/             # Kanal objeleri (POM / API client / DB client)
-    api/  web/  mobile/  db/
-  steps/                # Kanal bazlı step'ler — birbirini import edemez
-    api/  web/  mobile/  db/  common/
-features/               # .feature dosyaları (Gherkin)
-.dependency-cruiser.js  # Kanal izolasyonu enforcement (ArchUnit karşılığı)
+    world.ts             # TestWorld — tek state kaynağı
+    hooks.ts             # tag bazlı kanal init (+ Keycloak auth) + teardown
+    store.ts             # TypedStore
+    store-keys.ts        # defineKey<T> anahtar kataloğu
+    cleanup-registry.ts  # teardown (LIFO)
+    resilient-locator.ts # self-healing temeli (çoklu strateji + healing seam)
+    config/env.ts        # secrets + ortam, fail-fast (dotenv)
+  channels/
+    api/   auth-api.ts (Keycloak), document-api.ts
+    web/   document-list.page.ts (POM, dirençli locator)
+    mobile/ db/   (sonraki fazlar)
+  steps/   api/ web/ mobile/ db/ common/
+features/  cross-channel/*.feature
+.claude/   CLAUDE.md kuralları + hooks + skills + agents (Claude Code)
+.mcp.json  Playwright MCP (locator keşfi)
+.vscode/   cucumber step navigasyonu
 ```
 
----
-
-## Kurulum & Çalıştırma
+## Kurulum
 
 ```bash
 npm install
 npx playwright install
-cp .env.example .env      # gerçek değerleri gir
-
-npm run typecheck         # tip kontrolü
-npm run arch:check        # kanal izolasyonu ihlali var mı?
-npm run test:dry          # undefined/ambiguous step kontrolü (browser açmadan)
-npm test                  # tüm suite
-npm run test:parallel     # paralel
+cp .env.example .env        # gerçek değerleri gir
+# Allure CLI: brew install allure   (veya npm i -g allure-commandline)
 ```
 
-> **Feature dosyaları:** Bu teslimde `.feature.txt` uzantılı. Çalıştırmadan önce
-> `.feature` olarak yeniden adlandır (cucumber.js `.feature` bekler).
+> Feature dosyaları teslimde `.txt`; çalıştırmadan önce `.feature` yap.
 
----
+## Komutlar
 
-## Faz Sıralaması
-
-| Faz | İçerik | Durum |
-|-----|--------|-------|
-| 1 | Web UI + API + World/hook iskeleti | İskelet hazır (stub) |
-| 2 | DB doğrulama (SQL + NoSQL) | Stub |
-| 3 | Cross-channel senaryolar | Örnek hazır |
-| 4 | Mobile (Appium remote client) | Planlandı |
-| 5 | Consumer contract (Pact) | Planlandı |
-
----
-
-## CI Önerisi (sıra önemli)
-
-```
-typecheck  ->  arch:check  ->  test:dry  ->  test:smoke  ->  test (parallel/sharded)
+```bash
+npm run typecheck            # tip
+npm run arch:check           # kanal izolasyonu
+npm run test:dry             # step eşleşmesi
+npm test                     # tüm suite
+npm run test:cross-channel   # @cross-channel
+npm run test:parallel        # paralel
+npm run allure:serve         # Allure rapor (hızlı önizleme)
+npm run allure:generate && npm run allure:open
 ```
 
-`arch:check` ve `test:dry`'ı smoke'tan ÖNCE koy: mimari ihlali ve eksik step'i
-browser açmadan, saniyeler içinde yakalarsın.
+## API Şema Varsayımları (DOĞRULA)
+
+`src/channels/api/document-api.ts` en üstündeki sabitler Türksat test ortamına
+göre teyit edilmeli: `ENDPOINT`, `REQ_TITLE_FIELD`, `RESP_ID_FIELD`,
+`RESP_NUMBER_FIELD` (evrakNo vs evrakSayi). Auth için `auth-api.ts`: password
+grant + `AUTH_URL`/`AUTH_CLIENT_ID`. `AUTH_URL` boşsa token akışı atlanır.
+
+## Faz Durumu
+
+- Faz 1: Web + API + auth + dirençli locator + Allure — bind-ready (şema sabitleri bekliyor)
+- Faz 2: DB (SQL + NoSQL) — stub
+- Faz 3: Cross-channel senaryolar — örnek hazır
+- Faz 4: Mobile (Appium) — bekliyor
+- Faz 5: Contract (Pact) — bekliyor
+
+## CI Sırası
+
+```
+typecheck -> arch:check -> test:dry -> test:smoke -> test (parallel) -> allure:generate
+```
