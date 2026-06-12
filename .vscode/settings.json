@@ -1,0 +1,12 @@
+{
+  "cucumberautocomplete.steps": ["src/steps/**/*.ts"],
+  "cucumberautocomplete.syncfeatures": "tests/**/*.feature",
+  "cucumberautocomplete.strictGherkinCompletion": true,
+  "cucumberautocomplete.smartSnippets": true,
+  "cucumberautocomplete.stepsInvariants": true,
+  "playwright.env": {
+    "BASE_URL": "${env:BASE_URL}",
+    "ADMIN_USER": "${env:ADMIN_USER}",
+    "ADMIN_PASS": "${env:ADMIN_PASS}"
+  }
+}

@@ -7,6 +7,9 @@ test-results/
 .env
 *.local
 
+# Auth — rol bazlı storageState (oturum/cookie; secret içerir, ASLA commit edilmez)
+/playwright/.auth/
+
 # Playwright
 /playwright-report/
 /blob-report/

@@ -8,8 +8,20 @@ import { classifyError } from '../../support/flaky';
 import { AuthApi } from '../../adapters/api/auth-api';
 import { IssueApiAdapter } from '../../adapters/api/issue.api-adapter';
 import { IssueBoardPage } from '../../adapters/web/issue-board.page';
+import { LoginPage } from '../../adapters/web/login.page';
+import { AppShellPage } from '../../adapters/web/app-shell.page';
+import { GorevFormPage } from '../../adapters/web/gorev-form.page';
+import { GorevListPage } from '../../adapters/web/gorev-list.page';
+import { GorevUpdatePage } from '../../adapters/web/gorev-update.page';
 import type { IssuePort } from '../ports/issue-port';
 import type { IssueBoardPort } from '../ports/issue-board-port';
+import type {
+  LoginPort,
+  AppShellPort,
+  GorevFormPort,
+  GorevListPort,
+  GorevUpdatePort,
+} from '../ports/gorev-web-ports';
 import { env } from '../../support/config/env';
 
 /**
@@ -33,6 +45,12 @@ type TestFixtures = {
   issuePort: IssuePort;
   /** Issue web kanalı — port; somut POM (IssueBoardPage) fixture ile enjekte edilir. */
   issueBoard: IssueBoardPort;
+  /** Görev (task) web kanalı port'ları — somut POM'lar fixture ile enjekte edilir. */
+  loginPage: LoginPort;
+  appShell: AppShellPort;
+  gorevForm: GorevFormPort;
+  gorevList: GorevListPort;
+  gorevUpdate: GorevUpdatePort;
 };
 
 export const test = base.extend<TestFixtures>({
@@ -83,6 +101,22 @@ export const test = base.extend<TestFixtures>({
   issueBoard: async ({ page }, use) => {
     // Web POM port arkasında enjekte edilir → step/task IssueBoardPage'i new'lemez (ADR kural 2).
     await use(new IssueBoardPage(page));
+  },
+
+  loginPage: async ({ page }, use) => {
+    await use(new LoginPage(page));
+  },
+  appShell: async ({ page }, use) => {
+    await use(new AppShellPage(page));
+  },
+  gorevForm: async ({ page }, use) => {
+    await use(new GorevFormPage(page));
+  },
+  gorevList: async ({ page }, use) => {
+    await use(new GorevListPage(page));
+  },
+  gorevUpdate: async ({ page }, use) => {
+    await use(new GorevUpdatePage(page));
   },
 });
 

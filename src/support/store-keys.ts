@@ -57,7 +57,8 @@ export const Keys = {
   CREATED_ISSUES: defineCollectionKey<Issue>('CREATED_ISSUES', { owner: 'api' }),
 
   // --- Web kanalı yazar ---
-  // (örnek) WEB_SELECTED_ROW_INDEX: defineKey<number>('WEB_SELECTED_ROW_INDEX'),
+  // Stage-1'de üretilen görev Konu'su; stage-2 (başka kullanıcı) arama ile doğrular.
+  CREATED_GOREV_KONU: defineKey<string>('CREATED_GOREV_KONU', { owner: 'web' }),
 
   // --- Mobile kanalı yazar ---
   // (örnek) MOBILE_PUSH_TOKEN: defineKey<string>('MOBILE_PUSH_TOKEN'),

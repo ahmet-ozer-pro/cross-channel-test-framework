@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
 import 'dotenv/config';
 
@@ -26,18 +26,23 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   // retry = TÜM testi yeniden koş (flake yutucu); bekleme/poll ile karıştırma (ayrı kavram).
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? 'github' : 'list',
+  reporter: process.env.CI ? 'github' : [['list', { printSteps: true }]],
   // FLAKY POLİTİKASI (#6): @quarantine'li testler varsayılan koşudan DIŞLANIR (yeşili
   // kirletmez). Ayrıca koşmak için: `npm run test:quarantine` (RUN_QUARANTINE=1).
   grepInvert: process.env.RUN_QUARANTINE ? undefined : /@quarantine/,
   use: {
     baseURL: process.env.BASE_URL,
+    headless: false,
+    viewport: null,
+    launchOptions: {
+      args: ['--start-maximized'],
+    },
     trace: 'on-first-retry',
   },
   projects: [
     // Gherkin senaryoları (playwright-bdd ile derlenen) — iş-okunur cross-channel akış.
-    { name: 'web', testDir: bddTestDir, use: { ...devices['Desktop Chrome'] } },
+    { name: 'web', testDir: bddTestDir },
     // Saf .spec.ts — framework self-test'leri; Gherkin'le AYNI runner'da yan yana.
-    { name: 'framework', testDir: 'tests/framework', use: { ...devices['Desktop Chrome'] } },
+    { name: 'framework', testDir: 'tests/framework' },
   ],
 });

@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Playwright BDD: Generate specs",
+      "type": "npm",
+      "script": "bdd:gen",
+      "problemMatcher": []
+    },
+    {
+      "label": "Playwright: List tests",
+      "type": "npm",
+      "script": "test:list",
+      "problemMatcher": []
+    },
+    {
+      "label": "Playwright: Run selected scenario",
+      "type": "shell",
+      "command": "npm run test:scenario -- \"${input:scenarioName}\"",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "scenarioName",
+      "type": "promptString",
+      "description": "Scenario name or grep pattern",
+      "default": "Yeni Görev Ekleme ve Atanan Kullanıcı Kontrolü"
+    }
+  ]
+}
