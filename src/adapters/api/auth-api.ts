@@ -23,9 +23,7 @@ export class AuthApi {
       },
     });
     if (!res.ok()) {
-      throw new Error(
-        `[AuthApi] token alınamadı: ${res.status()} ${await res.text()}`,
-      );
+      throw new Error(`[AuthApi] token alınamadı: ${res.status()} ${await res.text()}`);
     }
     const body = await res.json();
     return body.access_token as string;

@@ -11,13 +11,16 @@ description: Yeni bir cross-channel test senaryosu (API ile üretip web/mobil/db
    adapter ile enjekte eder). Mega-fixture yapma.
 3. **Factory + task.** `src/factories/<x>-factory.ts` (benzersiz veri) ve
    `src/tasks/<x>-tasks.ts` (üret + cleanup.register AYNI yerde + store'a yaz).
-4. **Senaryoyu yaz — iki biçimden biri (ADR-0001, ikisi de geçerli):**
-   - **BDD/Gherkin (tercih edilen iş-okunur yol):** `tests/<domain>/<isim>.feature` +
-     `src/steps/<x>.steps.ts`. Step'ler `createBdd(test)` ile yazılır (fixtures'a bağlanır);
-     senaryo state'i tipli store ile taşınır (When push'lar, Then okur). Ayrı World yok.
-   - **Saf spec:** `tests/<domain>/<isim>.spec.ts`. Aynı runner'da yan yana koşar.
+4. **Senaryoyu yaz — KANAL klasörü + DOMAIN tag (ADR-0002):**
+   - **Klasör:** tek kanal → `tests/<kanal>/` (web/mobile/api/db); çok kanal →
+     `tests/cross-channel/`.
+   - **TAG (zorunlu):** `@<domain>` (örn. `@issue`) + dokunulan kanal tag'leri (`@api @web`)
+     + tür (`@smoke`/`@e2e`/`@contract`); çok-kanal ise `@cross-channel`.
+   - **BDD/Gherkin (tercih):** `tests/<kanal>/<isim>.feature` + `src/steps/<x>.steps.ts`.
+     Step'ler `createBdd(test)` ile (fixtures'a bağlı); state tipli store ile (When push, Then oku).
+   - **Saf spec:** `tests/<kanal>/<isim>.spec.ts`. Aynı runner'da yan yana koşar.
    Her iki biçimde de: test/step somut adapter'a değil **port fixture'ına** bağlanır;
-   web doğrulaması Page Object (POM) üzerinden; `expect` ile assert.
+   web doğrulaması Page Object (POM) üzerinden; `expect` POM içinde.
 5. **Doğrula.** typecheck → arch:check → test:list (bddgen `.feature`'ı derler) →
    (backend varsa) `npm test`.
 

@@ -26,6 +26,9 @@ export interface StoreDump {
 
 const MASK = '***MASKED***';
 
+/** Loud-fail mesajlarının ortak kuyruğu (DRY — tek kaynak). */
+const OWNER_HINT = '(Yazma sahibi kanalı store-keys.ts içinde kontrol et.)';
+
 export class TypedStore {
   private readonly data = new Map<string, unknown>();
   private readonly collections = new Map<string, unknown[]>();
@@ -38,6 +41,11 @@ export class TypedStore {
     if (key.sensitive) this.sensitiveIds.add(key.id);
   }
 
+  /** Tutarlı loud-fail (DRY): prefix + detay + ortak sahip-ipucu kuyruğu. */
+  private fail(detail: string): never {
+    throw new Error(`[TypedStore] ${detail} ${OWNER_HINT}`);
+  }
+
   set<T>(key: StoreKey<T>, value: T): void {
     this.trackMeta(key);
     this.data.set(key.id, value);
@@ -45,11 +53,7 @@ export class TypedStore {
 
   get<T>(key: StoreKey<T>): T {
     if (!this.data.has(key.id)) {
-      throw new Error(
-        `[TypedStore] '${key.id}' anahtarı bulunamadı. ` +
-          `Bu değeri yazan step bu senaryoda çalıştı mı? ` +
-          `(Yazma sahibi kanalı store-keys.ts içinde kontrol et.)`,
-      );
+      this.fail(`'${key.id}' anahtarı bulunamadı. Bu değeri yazan step bu senaryoda çalıştı mı?`);
     }
     return this.data.get(key.id) as T;
   }
@@ -90,10 +94,9 @@ export class TypedStore {
    */
   getAll<T>(key: StoreKey<T>): T[] {
     if (!this.collections.has(key.id)) {
-      throw new Error(
-        `[TypedStore] '${key.id}' koleksiyonu init edilmedi. ` +
-          `Bu key'e push (ya da bilinçli boş için initCollection) yapan step ` +
-          `bu senaryoda çalıştı mı? (Yazma sahibi kanalı store-keys.ts içinde kontrol et.)`,
+      this.fail(
+        `'${key.id}' koleksiyonu init edilmedi. Bu key'e push ` +
+          `(ya da bilinçli boş için initCollection) yapan step bu senaryoda çalıştı mı?`,
       );
     }
     return this.collections.get(key.id) as T[];
@@ -103,10 +106,8 @@ export class TypedStore {
   last<T>(key: StoreKey<T>): T {
     const list = this.collections.get(key.id);
     if (!list) {
-      throw new Error(
-        `[TypedStore] '${key.id}' koleksiyonu init edilmedi. ` +
-          `Bu key'e push yapan step bu senaryoda çalıştı mı? ` +
-          `(Yazma sahibi kanalı store-keys.ts içinde kontrol et.)`,
+      this.fail(
+        `'${key.id}' koleksiyonu init edilmedi. Bu key'e push yapan step bu senaryoda çalıştı mı?`,
       );
     }
     if (list.length === 0) {

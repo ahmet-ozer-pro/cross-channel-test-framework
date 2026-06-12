@@ -4,6 +4,7 @@ import { test as base } from 'playwright-bdd';
 import { request as playwrightRequest, type APIRequestContext } from '@playwright/test';
 import { TypedStore } from '../../support/store';
 import { CleanupRegistry } from '../../support/cleanup-registry';
+import { classifyError } from '../../support/flaky';
 import { AuthApi } from '../../adapters/api/auth-api';
 import { IssueApiAdapter } from '../../adapters/api/issue.api-adapter';
 import { IssueBoardPage } from '../../adapters/web/issue-board.page';
@@ -38,14 +39,17 @@ export const test = base.extend<TestFixtures>({
   store: async ({}, use, testInfo) => {
     const store = new TypedStore();
     await use(store);
-    // DUMP-ON-FAILURE (#5): test çöktüyse store'un okunur anlık görüntüsünü teşhise ekle.
-    // Sensitive değerler maskelenir. Cross-channel debug süresini ciddi düşürür.
+    // DUMP-ON-FAILURE (#5): test çöktüyse store'un okunur anlık görüntüsünü + hata
+    // taksonomisini (#6) teşhise ekle. Sensitive maskelenir. Cross-channel debug'ı kısaltır.
     if (testInfo.status !== testInfo.expectedStatus) {
-      const dump = store.dump();
+      const snapshot = {
+        flakeReason: classifyError(testInfo.error), // timeout/locator/data/network/unknown
+        store: store.dump(),
+      };
       testInfo.attachments.push({
         name: 'store-dump',
         contentType: 'application/json',
-        body: Buffer.from(JSON.stringify(dump, null, 2), 'utf-8'),
+        body: Buffer.from(JSON.stringify(snapshot, null, 2), 'utf-8'),
       });
     }
   },

@@ -7,7 +7,7 @@ import { CleanupRegistry } from '../../src/support/cleanup-registry';
  * LIFO sıra ve hata-izolasyonu teardown'ın güvenliği için kritik; burada kilitlenir.
  */
 describe('CleanupRegistry', () => {
-  test('runAll: task\'ları LIFO (ters) sırayla çalıştırır', async () => {
+  test("runAll: task'ları LIFO (ters) sırayla çalıştırır", async () => {
     const registry = new CleanupRegistry();
     const order: number[] = [];
     registry.register(async () => {

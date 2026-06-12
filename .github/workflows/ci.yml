@@ -20,7 +20,7 @@ on:
 
 jobs:
   gates:
-    name: typecheck · arch · unit · test-list
+    name: lint · format · typecheck · arch · unit · test-list
     runs-on: ubuntu-latest
 
     # CI PLACEHOLDER ENV — gerçek koşu DEĞİL, gerçek secret DEĞİL.
@@ -44,6 +44,12 @@ jobs:
 
       - name: Install (npm ci)
         run: npm ci
+
+      - name: Lint (ESLint + sonarjs — KISS/DRY enforcement)
+        run: npm run lint
+
+      - name: Format kontrolü (Prettier)
+        run: npm run format:check
 
       - name: Typecheck
         run: npm run typecheck

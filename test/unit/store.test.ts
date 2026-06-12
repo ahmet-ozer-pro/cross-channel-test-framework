@@ -25,6 +25,8 @@ describe('TypedStore — tek değer (set/get/has)', () => {
     const store = new TypedStore();
     const key = defineKey<number>('N');
     store.set(key, 1);
+    // İkinci set KASITLI (overwrite semantiğini test ediyoruz) — sonarjs yanlış-pozitifi.
+    // eslint-disable-next-line sonarjs/no-element-overwrite
     store.set(key, 2);
     assert.equal(store.get(key), 2);
   });
@@ -84,7 +86,7 @@ describe('TypedStore — koleksiyon (push/getAll/last/initCollection)', () => {
 });
 
 describe('TypedStore — clear', () => {
-  test('clear: hem tek-değer hem koleksiyon namespace\'ini sıfırlar', () => {
+  test("clear: hem tek-değer hem koleksiyon namespace'ini sıfırlar", () => {
     const store = new TypedStore();
     const single = defineKey<string>('S');
     const coll = defineCollectionKey<string>('C');

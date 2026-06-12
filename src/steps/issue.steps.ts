@@ -22,7 +22,7 @@ When('API ile yeni bir issue oluşturulur', async ({ issuePort, store, cleanup }
   await createIssue({ issuePort, store, cleanup });
 });
 
-Then('issue board\'da o issue görünür', async ({ issueBoard, store }) => {
+Then("issue board'da o issue görünür", async ({ issueBoard, store }) => {
   const issue = store.last(Keys.CREATED_ISSUES);
   // Web kanalı PORT üzerinden: somut POM ve raw locator/expect dışarı sızmaz (ADR kural 2/4).
   await issueBoard.open();

@@ -8,7 +8,7 @@ import { defineKey, defineCollectionKey } from '../../src/support/store-keys';
  * sensitive maskeleme + koleksiyon sahip/adet/son-değer + tüm listeyi şişirmeme.
  */
 describe('TypedStore.dump — teşhis anlık görüntüsü', () => {
-  test('sensitive anahtar dump\'ta MASKELENİR, normal değer görünür', () => {
+  test("sensitive anahtar dump'ta MASKELENİR, normal değer görünür", () => {
     const store = new TypedStore();
     store.set(defineKey<string>('USER_TOKEN', { sensitive: true }), 'gizli-jwt');
     store.set(defineKey<string>('ENV', { owner: 'api' }), 'staging');

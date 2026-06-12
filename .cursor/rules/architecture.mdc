@@ -17,6 +17,7 @@ Bu karardan sapmak YENİ BİR ADR gerektirir; tek PR içinde sessizce sapma YASA
   adapter **fixture** ile enjekte edilir. Tool-bağlı kod yalnızca `src/adapters/**`.
 - **Screenplay YASAK.** Chaining = `src/tasks/**` altındaki kompoze görevler.
 - **Kanal izolasyonu:** yalnızca tipli context/store üzerinden.
-- **Organizasyon DOMAIN bazlı** (`tests/<domain>/`), kanal bazlı değil.
+- **Organizasyon KANAL bazlı** (`tests/{web,mobile,api,db}/` + `cross-channel/`, ADR-0002);
+  domain = zorunlu `@<domain>` tag (`--grep @issue`).
 - Test verisi: factory + benzersiz üretim + üretimle aynı yerde cleanup.
 - 10k: çok contract/API + az e2e (test trophy); paralel + CI sharding + retry/quarantine.

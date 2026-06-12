@@ -36,7 +36,7 @@ function strategy(id: string) {
 const fakePage = {} as never;
 
 describe('resolve()', () => {
-  test('çok strateji: hepsini .or() ile zincirler, sonucu .first()\'ler', async () => {
+  test("çok strateji: hepsini .or() ile zincirler, sonucu .first()'ler", async () => {
     const result = (await resolve(fakePage, [
       strategy('s1'),
       strategy('s2'),
@@ -54,7 +54,7 @@ describe('resolve()', () => {
     assert.equal(result.firstCalled, true);
   });
 
-  test('tek strateji: OR zinciri boş ama yine .first()\'lenir', async () => {
+  test("tek strateji: OR zinciri boş ama yine .first()'lenir", async () => {
     const result = (await resolve(fakePage, [strategy('only')] as never)) as unknown as FakeLocator;
 
     assert.equal(result.id, 'only');

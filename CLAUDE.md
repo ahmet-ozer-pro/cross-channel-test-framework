@@ -25,6 +25,8 @@ Hedef: hızlı büyürken mimari olgunluğu korumak.
 
 ## Komutlar
 
+- `npm run lint` — ESLint + sonarjs (KISS/DRY: complexity/duplikasyon) · `lint:fix` otomatik düzeltir
+- `npm run format` / `format:check` — Prettier (kod formatı tek kaynak)
 - `npm run typecheck` — TypeScript tip kontrolü (env'e dokunmaz, her zaman çalışır)
 - `npm run arch:check` — ports/adapters katmanlama enforcement (dependency-cruiser)
 - `npm run test:unit` — framework self-test (store/cleanup/locator; env'siz)
@@ -55,8 +57,26 @@ Hedef: hızlı büyürken mimari olgunluğu korumak.
 - Mobile Screen Object → `*.screen.ts` (`adapters/mobile/`)
 - Port (arayüz) → `*-port.ts` (`core/ports/`) · Adapter → `*.api-adapter.ts` (`adapters/<kanal>/`)
 - Task → `*-tasks.ts` (`tasks/`) · Factory → `*-factory.ts` (`factories/`)
-- Spec → `*.spec.ts` (`tests/<domain>/`) · Gherkin → `*.feature` (`tests/<domain>/`)
+- Spec → `*.spec.ts` · Gherkin → `*.feature` — **kanal klasöründe** (`tests/<kanal>/` ya da `tests/cross-channel/`, ADR-0002) + zorunlu `@<domain>` tag
 - Step-def → `*.steps.ts` (`src/steps/`) — `createBdd(test)` ile fixtures'a bağlanır
+
+## Test Organizasyonu (KANAL klasör + DOMAIN tag — ADR-0002)
+
+Testler **kanala göre** klasörlenir; domain ekseni **tag**'le taşınır:
+
+```
+tests/{web,mobile,api,db}/   # tek-kanal senaryolar (o kanala özel)
+tests/cross-channel/         # birden çok kanala dokunan senaryolar
+tests/framework/             # framework smoke (*.spec.ts)
+```
+
+- **Klasör = ait olduğu kanal.** Tek kanal → o kanalın klasörü; çok kanal → `cross-channel/`.
+- **Her senaryo ZORUNLU bir domain tag'i taşır** (`@issue`…) → `--grep @issue` tüm domain'i,
+  klasörden bağımsız bulur.
+- **Tag taksonomisi:** kanal `@api @web @mobile @db @contract` (dokunulan tümü) · tür
+  `@smoke @e2e @contract` · ops `@quarantine` · çok-kanal `@cross-channel`.
+- **Koşu:** `npm test -- --grep @web` (web'e dokunan her şey) · `playwright test tests/web`
+  (sadece web-only klasörü) · `--grep @issue` (tüm domain).
 
 ## Kod Standardı
 
@@ -76,8 +96,9 @@ Hedef: hızlı büyürken mimari olgunluğu korumak.
 
 ## Tamamlandı Demeden Önce
 
-`typecheck` + `arch:check` + `test:unit` + `test:list` dördü de temiz geçmeli.
-Bir stub'ı gerçek implementasyona bağlarken ilgili spec'i de yeşile çevir.
+`lint` + `format:check` + `typecheck` + `arch:check` + `test:unit` + `test:list` altısı da
+temiz geçmeli (CI bunları gate olarak koşar). Bir stub'ı gerçek implementasyona bağlarken
+ilgili spec'i de yeşile çevir.
 
 ## Çalışma Tarzı
 

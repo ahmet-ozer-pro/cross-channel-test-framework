@@ -15,7 +15,7 @@ AI araçları için: [CLAUDE.md](CLAUDE.md) · [AGENTS.md](AGENTS.md). Bu karard
 
 1. **Tek runner: Playwright Test.** Senaryolar Gherkin `.feature` (playwright-bdd ile
    derlenir, step'ler `src/steps/`) ve/veya saf `*.spec.ts` — ikisi yan yana, DI fixtures
-   ile (`tests/<domain>/`). **BDD/Gherkin korunur.**
+   ile (`tests/<kanal>/` + `cross-channel/`, ADR-0002). **BDD/Gherkin korunur.**
 2. **Kanallar yalnızca tipli `store` (fixture) üzerinden konuşur.** Hiçbir adapter başka
    kanalın adapter'ına dokunmaz. `arch:check` ile zorlanır.
 3. **Test/task somut adapter'a değil port'a bağlanır** (fixture enjeksiyonu); tool-bağlı
@@ -42,7 +42,7 @@ src/
     wait.ts · flaky.ts         # pollUntil (convergence) + flaky taksonomisi
     test-run.ts                # testRunId + worker-safe uniqueName
     config/env.ts · timeouts.ts # secrets/ortam (fail-fast) + merkezi bekleme süreleri
-tests/   <domain>/   # Gherkin *.feature ve/veya *.spec.ts (domain bazlı)
+tests/   {web,mobile,api,db}/ + cross-channel/   # KANAL bazlı (ADR-0002); domain = tag (@issue)
 test/    unit/       # framework self-test (node:test)
 .claude/   CLAUDE.md kuralları + skills + agents (Claude Code)
 .mcp.json  Playwright MCP (locator keşfi)

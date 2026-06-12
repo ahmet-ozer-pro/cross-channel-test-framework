@@ -9,10 +9,10 @@ import type { Issue, IssuePort } from '../../core/ports/issue-port';
  * SADECE aşağıdaki sabitleri değiştir; port, task, fixture ve spec aynı kalır.
  * (Gerçek Jira: payload `fields` altında project + issuetype de ister.)
  */
-const ENDPOINT = '/rest/api/2/issue';   // issue oluşturma yolu
-const REQ_SUMMARY_FIELD = 'summary';    // request: başlık alanı
-const RESP_ID_FIELD = 'id';             // response: kimlik
-const RESP_KEY_FIELD = 'key';           // response: görünür anahtar
+const ENDPOINT = '/rest/api/2/issue'; // issue oluşturma yolu
+const REQ_SUMMARY_FIELD = 'summary'; // request: başlık alanı
+const RESP_ID_FIELD = 'id'; // response: kimlik
+const RESP_KEY_FIELD = 'key'; // response: görünür anahtar
 
 /**
  * CONTRACT doğrulaması (#1): response BEKLENEN shape'e uyuyor mu? Gerçek backend bağlanınca
@@ -42,7 +42,9 @@ export class IssueApiAdapter implements IssuePort {
       data: { fields: { [REQ_SUMMARY_FIELD]: summary } },
     });
     if (!res.ok()) {
-      throw new Error(`[IssueApiAdapter] issue oluşturulamadı: ${res.status()} ${await res.text()}`);
+      throw new Error(
+        `[IssueApiAdapter] issue oluşturulamadı: ${res.status()} ${await res.text()}`,
+      );
     }
     const body: unknown = await res.json();
     assertIssueShape(body);

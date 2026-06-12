@@ -1,0 +1,10 @@
+# Üretim/vendor — formatlanmaz
+.features-gen/
+node_modules/
+playwright-report/
+test-results/
+reports/
+package-lock.json
+
+# Markdown ayrı tutuluyor (elle biçimli TR doküman/ADR'ler; Prettier reflow'undan kaçın)
+*.md

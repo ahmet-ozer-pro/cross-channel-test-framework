@@ -65,8 +65,13 @@ okunabilirliği değerli. Gherkin'i kaldırmak için YENİ BİR ADR gerekir; ses
 5. **Chaining:** Karmaşık/zincirli akışlar `tasks/` altındaki kompoze edilebilir
    görevlerle kurulur (örn. `createIssue` → `assignIssue`); senaryo içinde ham
    adapter juggling ile değil. State tipli context + koleksiyon API ile taşınır.
-6. **Organizasyon:** Testler **DOMAIN**'e göre (`tests/<domain>/`), kanala göre DEĞİL.
-   Disiplinli tag taksonomisi (`@smoke @e2e @contract @<domain> @quarantine`).
+6. **Organizasyon:** ⚠️ **Bu kural [ADR-0002](0002-test-organizasyonu-kanal-bazli.md) ile
+   DEĞİŞTİRİLDİ.** Geçerli karar: testler **KANAL**'a göre klasörlenir
+   (`tests/{web,mobile,api,db,cross-channel}/`), domain ekseni **TAG**'le taşınır
+   (zorunlu `@<domain>`). Tag taksonomisi — kanal: `@api @web @mobile @db @contract`;
+   tür: `@smoke @e2e @contract`; ops: `@quarantine`. Bir senaryo çok tag taşır;
+   `--grep @web` web'e dokunan her şeyi, `--grep @issue` tüm domain'i seçer.
+   _(Tarihsel: ADR-0001 başlangıçta domain-bazlı klasör öngörmüştü.)_
 7. **Test verisi:** factory/builder + benzersiz üretim (randomUUID/worker-id) +
    üretimle AYNI yerde cleanup kaydı. Veri birikmez, paralelde çakışmaz.
 8. **Ölçek:** Paralellik + CI sharding (`--shard=i/N`); flake için retry + `@quarantine`
