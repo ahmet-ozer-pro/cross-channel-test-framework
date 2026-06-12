@@ -1,7 +1,6 @@
 import { createBdd } from 'playwright-bdd';
-import { test, expect } from '../core/fixtures/test-fixtures';
+import { test } from '../core/fixtures/test-fixtures';
 import { createIssue } from '../tasks/issue-tasks';
-import { IssueBoardPage } from '../adapters/web/issue-board.page';
 import { Keys } from '../support/store-keys';
 
 /**
@@ -23,11 +22,9 @@ When('API ile yeni bir issue oluşturulur', async ({ issuePort, store, cleanup }
   await createIssue({ issuePort, store, cleanup });
 });
 
-Then('issue board\'da o issue görünür', async ({ page, store }) => {
+Then('issue board\'da o issue görünür', async ({ issueBoard, store }) => {
   const issue = store.last(Keys.CREATED_ISSUES);
-  const board = new IssueBoardPage(page);
-  await board.open();
-
-  const card = await board.cardByKey(issue.key);
-  await expect(card).toBeVisible();
+  // Web kanalı PORT üzerinden: somut POM ve raw locator/expect dışarı sızmaz (ADR kural 2/4).
+  await issueBoard.open();
+  await issueBoard.expectCardVisible(issue.key);
 });

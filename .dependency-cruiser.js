@@ -21,17 +21,38 @@ module.exports = {
     // --- ADR-0001: Ports & Adapters katmanlama (soyutlama somuta bağlanmaz) ---
     {
       name: 'ports-are-pure',
-      comment: 'Port (soyutlama) somut adapter/channel/fixture\'a bağlanamaz — tool-bağımsız kalır.',
+      comment: 'Port (soyutlama) somut adapter/fixture\'a bağlanamaz — tool-bağımsız kalır.',
       severity: 'error',
       from: { path: '^src/core/ports' },
-      to: { path: '^src/(adapters|channels|core/fixtures)' },
+      to: { path: '^src/(adapters|core/fixtures)' },
+    },
+    {
+      name: 'ports-no-tool',
+      comment: 'Port arayüzleri HİÇBİR tool/npm paketi import edemez (saf TS sözleşmesi).',
+      severity: 'error',
+      from: { path: '^src/core/ports' },
+      to: { dependencyTypes: ['npm', 'npm-dev', 'npm-peer', 'npm-optional'] },
     },
     {
       name: 'tasks-use-ports-not-adapters',
       comment: 'Task\'lar somut adapter\'a değil port\'a bağlanır (DI ile gelir).',
       severity: 'error',
       from: { path: '^src/tasks' },
-      to: { path: '^src/(adapters|channels)' },
+      to: { path: '^src/adapters' },
+    },
+    {
+      name: 'steps-use-ports-not-adapters',
+      comment: 'Gherkin step\'leri somut adapter/POM\'a değil port\'a (fixture) bağlanır.',
+      severity: 'error',
+      from: { path: '^src/steps' },
+      to: { path: '^src/adapters' },
+    },
+    {
+      name: 'support-no-adapters',
+      comment: 'support/ altyapısı somut adapter\'a bağlanamaz (bağımlılık yönü: adapter→support).',
+      severity: 'error',
+      from: { path: '^src/support' },
+      to: { path: '^src/adapters' },
     },
     {
       name: 'adapters-channel-isolation',

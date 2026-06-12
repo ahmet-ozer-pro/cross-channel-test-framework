@@ -6,6 +6,7 @@
   "scripts": {
     "test": "bddgen && playwright test",
     "test:list": "bddgen && playwright test --list",
+    "test:quarantine": "bddgen && RUN_QUARANTINE=1 playwright test --grep @quarantine",
     "test:unit": "node --require ts-node/register/transpile-only --test test/unit/*.test.ts",
     "arch:check": "depcruise src --config .dependency-cruiser.js",
     "typecheck": "tsc --noEmit"

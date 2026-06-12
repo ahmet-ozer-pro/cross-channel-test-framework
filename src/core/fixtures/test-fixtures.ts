@@ -4,9 +4,11 @@ import { test as base } from 'playwright-bdd';
 import { request as playwrightRequest, type APIRequestContext } from '@playwright/test';
 import { TypedStore } from '../../support/store';
 import { CleanupRegistry } from '../../support/cleanup-registry';
-import { AuthApi } from '../../channels/api/auth-api';
+import { AuthApi } from '../../adapters/api/auth-api';
 import { IssueApiAdapter } from '../../adapters/api/issue.api-adapter';
+import { IssueBoardPage } from '../../adapters/web/issue-board.page';
 import type { IssuePort } from '../ports/issue-port';
+import type { IssueBoardPort } from '../ports/issue-board-port';
 import { env } from '../../support/config/env';
 
 /**
@@ -26,13 +28,26 @@ type TestFixtures = {
   cleanup: CleanupRegistry;
   /** Düşük seviye API request context (auto-dispose). Domain adapter'ları bunu kullanır. */
   apiRequest: APIRequestContext;
-  /** Issue kanalı — port; somut adapter fixture ile enjekte edilir. */
+  /** Issue API kanalı — port; somut adapter fixture ile enjekte edilir. */
   issuePort: IssuePort;
+  /** Issue web kanalı — port; somut POM (IssueBoardPage) fixture ile enjekte edilir. */
+  issueBoard: IssueBoardPort;
 };
 
 export const test = base.extend<TestFixtures>({
-  store: async ({}, use) => {
-    await use(new TypedStore());
+  store: async ({}, use, testInfo) => {
+    const store = new TypedStore();
+    await use(store);
+    // DUMP-ON-FAILURE (#5): test çöktüyse store'un okunur anlık görüntüsünü teşhise ekle.
+    // Sensitive değerler maskelenir. Cross-channel debug süresini ciddi düşürür.
+    if (testInfo.status !== testInfo.expectedStatus) {
+      const dump = store.dump();
+      testInfo.attachments.push({
+        name: 'store-dump',
+        contentType: 'application/json',
+        body: Buffer.from(JSON.stringify(dump, null, 2), 'utf-8'),
+      });
+    }
   },
 
   cleanup: async ({}, use) => {
@@ -59,6 +74,11 @@ export const test = base.extend<TestFixtures>({
 
   issuePort: async ({ apiRequest }, use) => {
     await use(new IssueApiAdapter(apiRequest));
+  },
+
+  issueBoard: async ({ page }, use) => {
+    // Web POM port arkasında enjekte edilir → step/task IssueBoardPage'i new'lemez (ADR kural 2).
+    await use(new IssueBoardPage(page));
   },
 });
 

@@ -24,8 +24,12 @@ const bddTestDir = defineBddConfig({
 export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
+  // retry = TÜM testi yeniden koş (flake yutucu); bekleme/poll ile karıştırma (ayrı kavram).
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',
+  // FLAKY POLİTİKASI (#6): @quarantine'li testler varsayılan koşudan DIŞLANIR (yeşili
+  // kirletmez). Ayrıca koşmak için: `npm run test:quarantine` (RUN_QUARANTINE=1).
+  grepInvert: process.env.RUN_QUARANTINE ? undefined : /@quarantine/,
   use: {
     baseURL: process.env.BASE_URL,
     trace: 'on-first-retry',

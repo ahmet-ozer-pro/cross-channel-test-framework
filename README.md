@@ -29,18 +29,19 @@ AI araçları için: [CLAUDE.md](CLAUDE.md) · [AGENTS.md](AGENTS.md). Bu karard
 ```
 src/
   core/
-    ports/     # tool-bağımsız arayüzler (örn. IssuePort) — ADR-0001
+    ports/     # tool-bağımsız arayüzler (IssuePort, IssueBoardPort) — ADR-0001
     fixtures/  # Playwright fixtures (DI: store, cleanup, apiRequest, port'lar)
-  adapters/    # port implementasyonları (tool-bağlı): api/ web/ mobile/ db/ contract/
+  adapters/    # port implementasyonları (tool-bağlı, TEK ev): api/ web/ db/ mobile/ contract/
   tasks/       # kompoze edilebilir iş görevleri (chaining)
-  factories/   # test verisi builder'ları
+  factories/   # test verisi builder'ları (worker-safe benzersiz)
   steps/       # Gherkin step-def'leri (createBdd(test) → fixtures)
-  channels/    # api/ (auth-api) · db/ (db-client stub)
   support/
-    store.ts · store-keys.ts   # TypedStore + tipli anahtarlar
+    store.ts · store-keys.ts   # TypedStore (dump/maskeleme) + tipli anahtarlar (owner/sensitive)
     cleanup-registry.ts        # teardown (LIFO)
     resilient-locator.ts       # çoklu strateji + healing seam
-    config/env.ts              # secrets + ortam, fail-fast (dotenv)
+    wait.ts · flaky.ts         # pollUntil (convergence) + flaky taksonomisi
+    test-run.ts                # testRunId + worker-safe uniqueName
+    config/env.ts · timeouts.ts # secrets/ortam (fail-fast) + merkezi bekleme süreleri
 tests/   <domain>/   # Gherkin *.feature ve/veya *.spec.ts (domain bazlı)
 test/    unit/       # framework self-test (node:test)
 .claude/   CLAUDE.md kuralları + skills + agents (Claude Code)

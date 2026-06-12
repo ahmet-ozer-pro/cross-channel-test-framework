@@ -28,8 +28,9 @@ Hedef: hızlı büyürken mimari olgunluğu korumak.
 - `npm run typecheck` — TypeScript tip kontrolü (env'e dokunmaz, her zaman çalışır)
 - `npm run arch:check` — ports/adapters katmanlama enforcement (dependency-cruiser)
 - `npm run test:unit` — framework self-test (store/cleanup/locator; env'siz)
-- `npm run test:list` — Playwright testlerini derleyip listeler (browser/backend gerekmez)
-- `npm test` — tüm Playwright suite (gerçek backend + browser ister)
+- `npm run test:list` — `.feature`'ları derler (bddgen) + testleri listeler (browser/backend gerekmez)
+- `npm test` — tüm suite (gerçek backend + browser ister; @quarantine hariç)
+- `npm run test:quarantine` — yalnızca `@quarantine`'li (kararsız) testleri koşar
 
 ## Mimari Kurallar (BOZULAMAZ)
 
@@ -37,12 +38,16 @@ Hedef: hızlı büyürken mimari olgunluğu korumak.
    başka kanalın adapter'ını import ETMEZ. (Bu kural `arch:check` ile zorlanır.)
 2. Store anahtarları `defineKey<T>` / `defineCollectionKey<T>` ile tipli (`store-keys.ts`).
    Raw `Map<string, any>` YASAK. Yeni anahtarın tipini ver, yazan kanalı yorumla belirt.
-3. Test/task somut adapter'a değil **port arayüzüne** bağlanır; adapter **fixture** ile
+3. Test/task/step somut adapter'a değil **port arayüzüne** bağlanır; adapter **fixture** ile
    enjekte edilir. Tool-bağlı kod (Playwright/Appium/pg/Pact) YALNIZCA `src/adapters/**`.
-4. Test içine ham Playwright page çağrısı yazma; web etkileşimi **Page Object (POM)**
-   üzerinden git (`expect` ile assertion serbesttir).
+   **Web de port arkasında** (`IssueBoardPort`); step/task POM'u `new`'lemez, fixture enjekte eder.
+4. Test/step içine ham Playwright page çağrısı yazma; web etkileşimi **Page Object (POM)**
+   üzerinden git (`expect` POM içinde serbest; Locator dışarı sızmaz).
 5. Üretilen veriyi `cleanup.register(...)` ile ÜRETİMLE AYNI yerde kaydet (fixture
    teardown'da LIFO koşar). Karmaşık akışlar `src/tasks/**` görevleriyle kompoze edilir.
+6. **Bekleme: hard-wait YASAK** (`waitForTimeout`/`sleep`/sabit ms yok). Auto-wait + web-first
+   `expect`; cross-channel convergence için `support/wait.ts` `pollUntil`. Süreler
+   `support/config/timeouts.ts`'ten (sihirli sayı yok). Kararsız test → `@quarantine`.
 
 ## İsimlendirme
 

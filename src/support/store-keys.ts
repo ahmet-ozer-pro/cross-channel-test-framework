@@ -15,15 +15,23 @@
 
 import type { Issue } from '../core/ports/issue-port';
 
-export interface StoreKey<T> {
+/** Anahtar metadata'sı: sahiplik (audit) + hassasiyet (dump maskeleme). */
+export interface KeyOptions {
+  /** Bu anahtara YAZAN kanal (audit/dump için; okuma serbest). */
+  owner?: string;
+  /** true ise dump/teşhis çıktısında değer MASKELENİR (token, parola vb.). */
+  sensitive?: boolean;
+}
+
+export interface StoreKey<T> extends KeyOptions {
   readonly id: string;
   /** Phantom type marker — T'yi compile-time'da taşır, runtime'da asla set edilmez. */
   readonly __valueType?: T;
 }
 
 /** Tipli bir store anahtarı tanımlar (tek değer; set/get). */
-export function defineKey<T>(id: string): StoreKey<T> {
-  return { id };
+export function defineKey<T>(id: string, opts: KeyOptions = {}): StoreKey<T> {
+  return { id, ...opts };
 }
 
 /**
@@ -32,8 +40,8 @@ export function defineKey<T>(id: string): StoreKey<T> {
  * bu anahtar altında aynı tipte BİRDEN ÇOK entity biriktirilir (chaining,
  * N-kayıt üretip hepsini doğrulama). Flat set/get namespace'inden bağımsızdır.
  */
-export function defineCollectionKey<T>(id: string): StoreKey<T> {
-  return { id };
+export function defineCollectionKey<T>(id: string, opts: KeyOptions = {}): StoreKey<T> {
+  return { id, ...opts };
 }
 
 /**
@@ -42,10 +50,11 @@ export function defineCollectionKey<T>(id: string): StoreKey<T> {
  */
 export const Keys = {
   // --- API kanalı yazar ---
-  USER_TOKEN: defineKey<string>('USER_TOKEN'),
+  // sensitive: dump'ta maskelenir (token sızıntısı önlenir).
+  USER_TOKEN: defineKey<string>('USER_TOKEN', { owner: 'api', sensitive: true }),
 
   // Üretilen issue'ları biriktirir (chaining/toplu doğrulama). API push'lar, Web getAll okur.
-  CREATED_ISSUES: defineCollectionKey<Issue>('CREATED_ISSUES'),
+  CREATED_ISSUES: defineCollectionKey<Issue>('CREATED_ISSUES', { owner: 'api' }),
 
   // --- Web kanalı yazar ---
   // (örnek) WEB_SELECTED_ROW_INDEX: defineKey<number>('WEB_SELECTED_ROW_INDEX'),

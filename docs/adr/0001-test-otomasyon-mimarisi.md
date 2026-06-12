@@ -99,9 +99,27 @@ playwright.config.ts   # defineBddConfig (Gherkin→spec) + projects, sharding, 
 CI gate'leri, env fail-fast.
 **Tamamlanan geçiş:** RUNNER cucumber-js → Playwright Test; Gherkin katmanı korundu
 (playwright-bdd ile aynı runner'a taşındı), kanal client → port+adapter,
-hooks/world → fixtures, auth → fixture.
-**Sıradaki:** ilk domain dilimi (Issue), sonra tasks/factory, DB/Mobile/Contract,
-sharding + flake politikası.
+hooks/world → fixtures, auth → fixture. **`channels/` kaldırıldı** — tool-bağlı kodun
+TEK evi `adapters/` (api/web/db/mobile). **Web de port arkasında** (`IssueBoardPort`).
+**Sıradaki:** ikinci domain dilimi + tag taksonomisi; gerçek API'ye bağlama; DB/Mobile/Contract.
+
+### Eklenen olgunluk katmanları (faz A+)
+
+- **Wait strategy:** hard-wait yasak; auto-wait + `pollUntil` (convergence) + merkezi
+  `timeouts` (sihirli sayı yok). Flaky taksonomisi (`flaky.ts`) + `@quarantine` (varsayılan
+  koşudan grepInvert ile dışlanır).
+- **Contract:** adapter response'u shape-doğrular (schema kayması kaynağında patlar).
+- **Test verisi:** `testRunId` + worker-safe `uniqueName` (paralel çakışma yok, orphan izi).
+- **Store:** `dump()` (hata anında teşhis) + sensitive maskeleme + key ownership metadata.
+
+### Bilinçli ertelenenler (ATLANMADI — kararla beklemede, tetik: ilgili kanal/ölçek)
+
+- **EvidencePort** (birleşik kanıt soyutlaması): Playwright trace/screenshot/video zaten
+  built-in; ayrı port ancak DB/mobil kanıt eklenince (Faz C/D) anlamlı.
+- **Tam Contract testing (Pact/OpenAPI):** Faz D; gerçek API şeması + tüketici/üretici lazım.
+- **Flaky dashboard / unstable-test raporu:** suite 10k'ya yaklaşınca; şimdi taksonomi+quarantine yeter.
+- **Cleanup retry / orphan detector / dry-run:** gerçek backend bağlanınca (şu an simüle edilecek state yok).
+- **Store audit timeline / gelişmiş masking politikası:** Faz C/D, çok-kanal artınca.
 
 ## Sonuçlar
 

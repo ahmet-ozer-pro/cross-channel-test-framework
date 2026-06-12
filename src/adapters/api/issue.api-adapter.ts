@@ -14,6 +14,26 @@ const REQ_SUMMARY_FIELD = 'summary';    // request: başlık alanı
 const RESP_ID_FIELD = 'id';             // response: kimlik
 const RESP_KEY_FIELD = 'key';           // response: görünür anahtar
 
+/**
+ * CONTRACT doğrulaması (#1): response BEKLENEN shape'e uyuyor mu? Gerçek backend bağlanınca
+ * şema kayarsa (alan adı/tip değişir) test "undefined görünür" diye geç ve sessiz patlamak
+ * yerine BURADA, kaynağında, AÇIK bir contract hatasıyla patlar. Dependency-free shape check.
+ */
+function assertIssueShape(body: unknown): asserts body is Record<string, unknown> {
+  if (typeof body !== 'object' || body === null) {
+    throw new TypeError('[IssueApiAdapter][contract] issue response bir JSON nesnesi değil');
+  }
+  for (const field of [RESP_ID_FIELD, RESP_KEY_FIELD] as const) {
+    const value = (body as Record<string, unknown>)[field];
+    if (typeof value !== 'string' && typeof value !== 'number') {
+      throw new TypeError(
+        `[IssueApiAdapter][contract] beklenen alan '${field}' eksik ya da yanlış tip ` +
+          `(string/number bekleniyor, gelen: ${JSON.stringify(value)}). API şeması mı değişti?`,
+      );
+    }
+  }
+}
+
 export class IssueApiAdapter implements IssuePort {
   constructor(private readonly request: APIRequestContext) {}
 
@@ -24,7 +44,8 @@ export class IssueApiAdapter implements IssuePort {
     if (!res.ok()) {
       throw new Error(`[IssueApiAdapter] issue oluşturulamadı: ${res.status()} ${await res.text()}`);
     }
-    const body = await res.json();
+    const body: unknown = await res.json();
+    assertIssueShape(body);
     return { id: String(body[RESP_ID_FIELD]), key: String(body[RESP_KEY_FIELD]) };
   }
 

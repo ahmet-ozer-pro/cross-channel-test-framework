@@ -18,11 +18,28 @@ import { StoreKey } from './store-keys';
  *    entity biriktirir; chaining (parent→child) ve N-kayıt doğrulama içindir.
  *  İkisi ayrı Map'tir; biri diğerini etkilemez. clear() ikisini de sıfırlar.
  */
+/** dump() çıktısı — hata anında okunur anlık görüntü (sensitive maskeli). */
+export interface StoreDump {
+  data: Record<string, unknown>;
+  collections: Record<string, { owner?: string; count: number; lastValue: unknown }>;
+}
+
+const MASK = '***MASKED***';
+
 export class TypedStore {
   private readonly data = new Map<string, unknown>();
   private readonly collections = new Map<string, unknown[]>();
+  // Audit/maskeleme metadata'sı: yazma anında anahtardan toplanır (key ownership + sensitive).
+  private readonly owners = new Map<string, string>();
+  private readonly sensitiveIds = new Set<string>();
+
+  private trackMeta<T>(key: StoreKey<T>): void {
+    if (key.owner) this.owners.set(key.id, key.owner);
+    if (key.sensitive) this.sensitiveIds.add(key.id);
+  }
 
   set<T>(key: StoreKey<T>, value: T): void {
+    this.trackMeta(key);
     this.data.set(key.id, value);
   }
 
@@ -47,6 +64,7 @@ export class TypedStore {
    * 0 entity ürettiğini işaretler — getAll()'un loud-fail'inden ayrışır.
    */
   initCollection<T>(key: StoreKey<T>): void {
+    this.trackMeta(key);
     if (!this.collections.has(key.id)) {
       this.collections.set(key.id, []);
     }
@@ -54,6 +72,7 @@ export class TypedStore {
 
   /** Koleksiyona bir entity ekler (öncekileri EZMEZ; chaining/N-kayıt için). */
   push<T>(key: StoreKey<T>, value: T): void {
+    this.trackMeta(key);
     const list = this.collections.get(key.id);
     if (list) {
       list.push(value);
@@ -98,8 +117,31 @@ export class TypedStore {
     return list.at(-1) as T;
   }
 
+  /**
+   * Hata anında okunur anlık görüntü (#5). Sensitive değerler MASKELENİR; koleksiyonlar
+   * için sahip + adet + son değer verilir (tüm listeyi şişirmeden debug ipucu). Test
+   * fixture'ı bunu yalnızca senaryo BAŞARISIZSA teşhise ekler.
+   */
+  dump(): StoreDump {
+    const mask = (id: string, value: unknown) => (this.sensitiveIds.has(id) ? MASK : value);
+    const data: Record<string, unknown> = {};
+    for (const [id, value] of this.data) data[id] = mask(id, value);
+
+    const collections: StoreDump['collections'] = {};
+    for (const [id, list] of this.collections) {
+      collections[id] = {
+        owner: this.owners.get(id),
+        count: list.length,
+        lastValue: list.length > 0 ? mask(id, list.at(-1)) : undefined,
+      };
+    }
+    return { data, collections };
+  }
+
   clear(): void {
     this.data.clear();
     this.collections.clear();
+    this.owners.clear();
+    this.sensitiveIds.clear();
   }
 }
